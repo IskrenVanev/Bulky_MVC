@@ -2,6 +2,7 @@ using BulkyBook.DataAccess.Data;
 using BulkyBook.DataAccess.Repository;
 using BulkyBook.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 internal class Program
 {
@@ -13,7 +14,10 @@ internal class Program
 		builder.Services.AddControllersWithViews();
 		builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-		builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+		builder.Services.AddRazorPages();
+
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 		var app = builder.Build();
 
@@ -29,13 +33,16 @@ internal class Program
 		app.UseStaticFiles();
 
 		app.UseRouting();
-
+		app.UseAuthentication();
 		app.UseAuthorization();
-
+		app.MapRazorPages();
 		app.MapControllerRoute(
 			name: "default",
 			pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 		app.Run();
-	}
+		//TODO: check if this is correct
+        
+    }
 }
+
