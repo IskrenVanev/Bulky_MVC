@@ -27,6 +27,22 @@ internal class Program
             options.LogoutPath = $"/Identity/Account/Logout";
             options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
         });
+        builder.Services.AddAuthentication().AddFacebook(option =>
+        {
+            option.AppId = "689363139720077";
+            option.AppSecret = "dd69bc61d712491ec96fa72dc06f904e";
+        });
+
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(100);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+
+        });
+
+
         builder.Services.AddRazorPages();
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -48,6 +64,7 @@ internal class Program
 		app.UseRouting();
 		app.UseAuthentication();
 		app.UseAuthorization();
+        app.UseSession();
 		app.MapRazorPages();
 		app.MapControllerRoute(
 			name: "default",
