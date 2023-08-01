@@ -1,4 +1,5 @@
 using BulkyBook.DataAccess.Data;
+using BulkyBook.DataAccess.DbInitializer;
 using BulkyBook.DataAccess.Repository;
 using BulkyBook.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using BulkyBook.Utility;
 using Stripe;
+using Microsoft.Extensions.DependencyInjection;
 
 internal class Program
 {
@@ -42,7 +44,7 @@ internal class Program
 
         });
 
-
+        builder.Services.AddScoped<IDbInitializer, DbInitializer>();
         builder.Services.AddRazorPages();
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -65,14 +67,26 @@ internal class Program
 		app.UseAuthentication();
 		app.UseAuthorization();
         app.UseSession();
+        SeedDatabase();
 		app.MapRazorPages();
 		app.MapControllerRoute(
 			name: "default",
 			pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 		app.Run();
-		//TODO: check if this is correct
-        
+
+
+        void SeedDatabase()
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+              var dbInitializer =  scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                dbInitializer.Initialize();
+            }
+        }
+
     }
+
+    
 }
 
