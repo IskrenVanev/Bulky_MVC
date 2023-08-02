@@ -34,6 +34,11 @@ internal class Program
             option.AppId = "689363139720077";
             option.AppSecret = "dd69bc61d712491ec96fa72dc06f904e";
         });
+        builder.Services.AddAuthentication().AddMicrosoftAccount(option =>
+        {
+            option.ClientId = "164f0c8c-f889-454c-94ae-c3115e202adb";
+            option.ClientSecret = "7IL8Q~1nnQSOBuo10b9nY~_YwSRQX68aBl49ybtF";
+        });
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
