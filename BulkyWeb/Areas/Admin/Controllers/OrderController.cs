@@ -19,7 +19,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
     {
 
         private readonly IUnitOfWork _unitOfWork;
-        [BindProperty]
+        [BindProperty]  
         public OrderVM OrderVm { get; set; }
         public OrderController(IUnitOfWork unitOfWork)
         {

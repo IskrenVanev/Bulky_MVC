@@ -19,11 +19,11 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         public IActionResult Index()
         {
             List<Category> objCategoryList = _unitOfWork.Category.GetAll().ToList();
-            return View(objCategoryList);
+            return View("Index",objCategoryList);
         }
         public IActionResult Create()
         {
-            return View();
+            return View("Create");
         }
         [HttpPost]
         public IActionResult Create(Category obj)
@@ -40,7 +40,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                 TempData["success"] = "Category created successfully";
                 return RedirectToAction("Index");
             }
-            return View();
+            return View("Create");
 
         }
         public IActionResult Edit(int? id)

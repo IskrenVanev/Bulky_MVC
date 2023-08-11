@@ -34,9 +34,14 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                 Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages"),
                 Count = 1,
                 ProductId = productId
+            };
 
-        };
-            
+            // Update the count to be at least 1 if it's less than 1
+            if (cart.Count < 1)
+            {
+                cart.Count = 1;
+            }
+
             return View(cart);
         }
         [HttpPost]
