@@ -56,7 +56,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+            return View("Edit",categoryFromDb);
         }
         [HttpPost]
         public IActionResult Edit(Category obj)
@@ -87,7 +87,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+            return View("Delete", categoryFromDb);
         }
         [HttpPost, ActionName("Delete")]
 
