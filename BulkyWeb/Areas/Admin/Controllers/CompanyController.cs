@@ -25,7 +25,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         {
             List<Company> objCompanyList = _unitOfWork.Company.GetAll().ToList();
 
-            return View(objCompanyList);
+            return View("Index",objCompanyList);
         }
 
         public IActionResult Upsert(int? id)
@@ -67,7 +67,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             else
             {
                
-                return View(CompanyObj);
+                return View("Upsert",CompanyObj);
             }
         }
 
