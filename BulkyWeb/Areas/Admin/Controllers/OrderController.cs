@@ -27,7 +27,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            return View();
+            return View("Index");
         }
         public IActionResult Details(int orderId)
         {
@@ -38,7 +38,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                     _unitOfWork.OrderDetail.GetAll(u => u.OrderHeaderId == orderId, includeProperties: "Product")
 
             };
-            return View(OrderVm);
+            return View("Details",OrderVm);
 
         }
         [HttpPost]
@@ -65,7 +65,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             _unitOfWork.OrderHeader.Update(orderHeaderFromDb);
             _unitOfWork.Save();
 
-            TempData["Success"] = "Order Details Updated Successfully.";
+            //TempData["Success"] = "Order Details Updated Successfully.";
             return RedirectToAction(nameof(Details), new {orderId = orderHeaderFromDb.Id});
 
         }

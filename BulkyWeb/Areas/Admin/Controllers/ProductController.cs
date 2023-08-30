@@ -45,13 +45,13 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             if (id == null || id == 0)
             {
                 //create
-                return View(productVm);
+                return View("Upsert", productVm);
             }
             else
             {
                 //update
                 productVm.Product = _unitOfWork.Product.Get(u => u.Id == id, includeProperties:"ProductImages");
-                return View(productVm);
+                return View("Upsert", productVm);
             }
         }
         [HttpPost]
