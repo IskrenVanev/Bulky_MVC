@@ -1,6 +1,6 @@
 # Bulky_MVC
 Bulky_MVC is a web application designed for bulk book purchases, featuring separate admin and customer areas.
-##Table of Contents
+## Table of Contents
 1. Introduction
 2. Getting Started
 - Installation
@@ -10,7 +10,7 @@ Bulky_MVC is a web application designed for bulk book purchases, featuring separ
 5. Contributing
 
   
-##Introduction
+## Introduction
 Bulky_MVC is a web application built on the MVC (Model-View-Controller) architecture.
 The platform facilitates bulk book purchases with dedicated admin and customer areas,
 providing a seamless experience for both user types.
@@ -20,7 +20,7 @@ providing a seamless experience for both user types.
 
 ###Installation
 
-##Prerequisites
+## Prerequisites
 Make sure you have the following software installed on your machine:
 
 - **Visual Studio:** I recommend using Visual Studio 2022 Preview.
@@ -38,10 +38,10 @@ cd Bulky_MVC
 
 - Open appsettings.json and update the connection string in the DefaultConnection section to point to your desired database.
 
-**"ConnectionStrings": {
+** "ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=Bulky;Trusted_Connection=True;TrustServerCertificate=True"
 
-  },**
+  }, **
 
 
 4. Run Migrations:
