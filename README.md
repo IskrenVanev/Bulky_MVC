@@ -16,9 +16,9 @@ The platform facilitates bulk book purchases with dedicated admin and customer a
 providing a seamless experience for both user types.
 
 
-##Getting Started
+## Getting Started
 
-###Installation
+### Installation
 
 ## Prerequisites
 Make sure you have the following software installed on your machine:
