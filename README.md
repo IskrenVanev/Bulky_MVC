@@ -18,7 +18,7 @@ providing a seamless experience for both user types.
 
 ## Getting Started
 
-### Installation
+## Installation
 
 ## Prerequisites
 Make sure you have the following software installed on your machine:
@@ -38,10 +38,11 @@ cd Bulky_MVC
 
 - Open appsettings.json and update the connection string in the DefaultConnection section to point to your desired database.
 
-** "ConnectionStrings": {
+
+"ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=Bulky;Trusted_Connection=True;TrustServerCertificate=True"
 
-  }, **
+  },
 
 
 4. Run Migrations:
