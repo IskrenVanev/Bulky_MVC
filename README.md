@@ -58,7 +58,7 @@ Update-Database
 Use the following default user to log in and explore different areas of the application:
 
 - Admin Area:
-Email: admin@iskren.com
+Email: admin@iskren.com, 
 Password: Qqq123*
 
 - Customer Area:
