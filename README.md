@@ -38,10 +38,10 @@ cd Bulky_MVC
 
 - Open appsettings.json and update the connection string in the DefaultConnection section to point to your desired database.
 
-"ConnectionStrings": {
+`"ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=Bulky;Trusted_Connection=True;TrustServerCertificate=True"
 
-  },
+  },`
 
 
 4. Run Migrations:
