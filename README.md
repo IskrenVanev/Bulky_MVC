@@ -53,7 +53,7 @@ Update-Database
 5. Run the Application
 6. Explore the Application
 
-- Default User
+- Default User: 
 Use the following default user to log in and explore different areas of the application:
 
 - Admin Area:
