@@ -67,14 +67,14 @@ Create a new user by clicking "Register".
 Bulky_MVC is designed to make bulk book purchases easy and efficient. The application is divided into two main areas:
 
 ## Admin Area
--The admin can create, edit and delete categories of books
--The admin can create, edit and delete  book companies
--The admin can manage orders.
--The admin can create, edit and delete books
--The admin can manage users.
+- The admin can create, edit and delete categories of books
+- The admin can create, edit and delete  book companies
+- The admin can manage orders.
+- The admin can create, edit and delete books
+- The admin can manage users.
 ## Customer Area
--The customer can order different books 
--The customer can manage his cart
+- The customer can order different books 
+- The customer can manage his cart
 
 ## Employee role: 
 - The employees can manage orders
