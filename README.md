@@ -64,3 +64,26 @@ Password: Qqq123*
 - Customer Area:
 Create a new user by clicking "Register".
 
+## Usage
+Bulky_MVC is designed to make bulk book purchases easy and efficient. The application is divided into two main areas:
+
+## Admin Area
+-The admin can create, edit and delete categories of books
+-The admin can create, edit and delete  book companies
+-The admin can manage orders.
+-The admin can create, edit and delete books
+-The admin can manage users.
+## Customer Area
+-The customer can order different books 
+-The customer can manage his cart
+
+## There are also 2 more roles:
+## Employee role: 
+- The employees can manage orders
+## Company role: 
+- If a company orders books it has 30 days to pay for them
+
+
+## Project Structure:
+
+
