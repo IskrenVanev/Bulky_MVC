@@ -38,12 +38,10 @@ cd Bulky_MVC
 
 - Open appsettings.json and update the connection string in the DefaultConnection section to point to your desired database.
 
-
 "ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=Bulky;Trusted_Connection=True;TrustServerCertificate=True"
 
   },
-
 
 4. Run Migrations:
 
@@ -64,6 +62,7 @@ Password: Qqq123*
 - Customer Area:
 Create a new user by clicking "Register".
 
+
 ## Usage
 Bulky_MVC is designed to make bulk book purchases easy and efficient. The application is divided into two main areas:
 
@@ -77,7 +76,6 @@ Bulky_MVC is designed to make bulk book purchases easy and efficient. The applic
 -The customer can order different books 
 -The customer can manage his cart
 
-## There are also 2 more roles:
 ## Employee role: 
 - The employees can manage orders
 ## Company role: 
@@ -85,5 +83,19 @@ Bulky_MVC is designed to make bulk book purchases easy and efficient. The applic
 
 
 ## Project Structure:
+1. Data Access (It contains the DbContext, DbInitializer which creates 1 default admin user, all migrations, Repository pattern)
+2. Models (It contains all models and viewmodels)
+3. Utility (It contains helper classes)
+4. Test (It contains NUnit tests)
+5. BulkyWeb (It contains the 2 areas, views and view components, wwwroot folder and appsettings.json)
+6. BulkyWebRazor_Temp (Temporary project that I used so I can learn more about Razor pages.)
 
+
+## Contributing
+I welcome contributions to enhance Bulky_MVC. Follow these steps to contribute:
+
+1. Fork the repository
+2. Create a new branch
+3. Make your changes
+4. Open a pull request
 
