@@ -27,8 +27,8 @@ Make sure you have the following software installed on your machine:
 - **.NET SDK:** Ensure you have the .NET SDK installed, targeting the `net8.0` framework.
 
 1. Clone the repository:
-git clone https://github.com/isko02/Bulky_MVC.git
-cd Bulky_MVC
+- git clone https://github.com/isko02/Bulky_MVC.git
+- cd Bulky_MVC
 
 2. Open the Project:
 
