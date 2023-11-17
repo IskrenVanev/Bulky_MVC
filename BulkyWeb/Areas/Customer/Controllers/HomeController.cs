@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
+using BulkyBook.Models.ViewModels;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
 {
@@ -14,6 +15,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+       
 
         public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
         {
@@ -27,23 +29,29 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
             return View(productList);
         }
-        public IActionResult Details(int productId)
+        public IActionResult Details(int productId, Review? newReview)//Fix the review problem
         {
             ShoppingCart cart = new()
             {
                 Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages"),
                 Count = 1,
-                ProductId = productId
-            };
+                ProductId = productId,
+                Reviews = _unitOfWork.Review.GetAll().ToList()
+            }; 
 
             // Update the count to be at least 1 if it's less than 1
             if (cart.Count < 1)
             {
                 cart.Count = 1;
             }
-
+        
             return View(cart);
         }
+
+       
+
+
+
         [HttpPost]
         [Authorize]
         public IActionResult Details(ShoppingCart shoppingCart)
@@ -85,3 +93,34 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         }
     }
 }
+
+
+
+
+
+
+
+//if (ModelState.IsValid)
+//{
+//    if (cart.Product.Review.Any(r => r.Rating == newReview.Rating && r.Comment == newReview.Comment))
+//    {
+//        // Review with the same rating and comment already exists, handle accordingly
+//        TempData["warning"] = "Review with the same rating and comment already exists.";
+//    }
+//    foreach (var review in cart.Product.Review)
+//    {
+//        var Review = new Review
+//        {
+//            Rating = review.Rating,
+//            Comment = review.Comment,
+//            ProductId = cart.ProductId
+//        };
+
+//        _unitOfWork.Review.Add(Review);
+//    }
+
+
+//    _unitOfWork.Save();
+
+//    TempData["success"] = "Review submitted successfully";
+//}

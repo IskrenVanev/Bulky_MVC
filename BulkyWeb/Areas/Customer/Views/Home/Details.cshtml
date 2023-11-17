@@ -2,7 +2,7 @@
 
 <form method="post">
     <input hidden asp-for="ProductId"/>
-    <div class="card shadow border-0 mt-4 mb-4">
+    <div class=" shadow border-0 mt-4 mb-4">
         <div class="card-header bg-secondary bg-gradient text-light py-4">
             <div class="row">
                 <div class="col-12 text-center">
@@ -11,7 +11,7 @@
                 </div>
             </div>
         </div>
-        <div class="card-body">
+        <div class="card-body" >
             <div class="py-3">
                 <div class="row">
                     <div class="col-6 col-md-2 offset-lg-1 pb-1">
@@ -19,7 +19,7 @@
                             <small>Back to home</small>
                         </a>
                         <a href="https://localhost:7117/?status=@Model.Product.Category.Name" class="btn btn-outline-primary bg-gradient mb-3 fw-semibold btn-sm text-uppercase">
-                            <small>Back to @Model.Product.Category.Name category</small>
+                            <small>Go to @Model.Product.Category.Name category</small>
                         </a>
                     </div>
                 </div>
@@ -32,22 +32,22 @@
 
                        
                         
-                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-indicators">
+                            <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
                                 
-                                @foreach (var imageWithIndex
-                                    in Model.Product.ProductImages
-                                        .Select((image, index) 
-                                            => new { ProductImage = image, Index = index }))
-                                {
-                                    <button type="button" data-bs-target="#carouselExampleIndicators"
-                                            data-bs-slide-to="@imageWithIndex.Index" class="@(imageWithIndex.Index == 0 ?"active":"")
+                                    @foreach (var imageWithIndex
+                                        in Model.Product.ProductImages
+                                            .Select((image, index) 
+                                                => new { ProductImage = image, Index = index }))
+                                    {
+                                        <button type="button" data-bs-target="#carouselExampleIndicators"
+                                                data-bs-slide-to="@imageWithIndex.Index" class="@(imageWithIndex.Index == 0 ?"active":"")
                                             aria-current="true" aria-label="Slide 1"></button>
                                 
-                                }
+                                    }
 
-                              </div>
-                            <div class="carousel-inner">
+                                </div>
+                                <div class="carousel-inner">
                                     @foreach (var imageWithIndex
                                         in Model.Product.ProductImages
                                             .Select((image, index)
@@ -55,20 +55,20 @@
                                     {
                                         
                                     
-                                    <div class="@(imageWithIndex.Index==0?"carousel-item active":"carousel-item")">
-                                    <img src="@imageWithIndex.ProductImage.ImageUrl" class="d-block w-100" alt="...">
-                                </div>
+                                        <div class="@(imageWithIndex.Index==0?"carousel-item active":"carousel-item")">
+                                            <img src="@imageWithIndex.ProductImage.ImageUrl" class="d-block w-100" alt="...">
+                                        </div>
                                     }
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>
 
                         }
                         
@@ -149,4 +149,65 @@
             </div>
         </div>
     </div>
+   
 </form>
+@if (Model.Reviews != null && Model.Reviews.Count > 0)
+{
+    foreach (var review in Model.Reviews)
+    {
+        <p class="card-text">@review.Comment</p>
+    }
+}
+
+
+
+@if (User.Identity.IsAuthenticated)
+{ 
+    <form id="commentForm">
+        <input type="hidden" name="ProductId" value="@Model.ProductId" />
+        <input type="hidden" name="Id" value="@Model.Product.Id" />
+        <div class="mb-3">
+            <label class="form-label">Write your Comment</label>
+            <span class="text-warning float-end">
+                <i class="ratingStar fas fa-star" data-value="1"></i>
+                <i class="ratingStar far fa-star" data-value="2"></i>
+                <i class="ratingStar far fa-star" data-value="3"></i>
+                <i class="ratingStar far fa-star" data-value="4"></i>
+                <i class="ratingStar far fa-star" data-value="5"></i>
+            </span>
+
+            <input type="hidden" name="Rating" id="ratingsValue" value="1" />
+            <textarea class="form-control" rows="3" name="Text" placeholder="Write ur comments"></textarea>
+
+        </div>
+        <button class="btn btn-success" id="btnComment" type="button">Leave a Review</button>
+    </form>
+    
+}
+else
+{
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3">
+            <h3 class="text-center mb-3">Log in to leave a Review!</h3>
+        </div>
+    </div>
+}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+                        
+                        
+<script>
+        $("#btnComment").click(function () {
+            //debugger
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("LeaveComment", "Comments")',
+                data: $("#commentForm").serialize()
+            }).done(function (response) {
+                location.reload();
+            }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("fail");
+                alert("FAIL");
+            })
+        })
+
+</script>

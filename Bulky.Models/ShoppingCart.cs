@@ -26,5 +26,10 @@ namespace BulkyBook.Models
         [NotMapped] 
         public double Price { get; set; }
 
+
+        public List<Review> Reviews { get; set; }
+
+
+
     }
 }
