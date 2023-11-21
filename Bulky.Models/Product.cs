@@ -48,5 +48,8 @@ namespace BulkyBook.Models
         [ValidateNever]
         public List<ProductImage> ProductImages { get; set; }
 
+
+        public List<Review> Reviews { get; set; }
+
     }
 }
