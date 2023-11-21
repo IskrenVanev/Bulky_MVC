@@ -7,10 +7,10 @@ using BulkyBook.DataAccess.Repository.IRepository;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
 {
-    public class CommentsController : Controller
+    public class ReviewsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public CommentsController(IUnitOfWork unitOfWork)
+        public ReviewsController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -19,10 +19,12 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         public JsonResult LeaveComment(ReviewVM model)
         {
             Review review = new Review();
-            review.Comment = model.Comment;
-            review.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            review.ShoppingCartId = model.ShoppingCartId;
             review.ReviewId = model.ReviewId;
+            review.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            review.Comment = model.Comment;
+            
+            review.ProductId = model.ProductId;
+          
             review.Rating = 1;
             review.CommentedOn = DateTime.Now;
             JsonResult json = new JsonResult(review);

@@ -27,9 +27,9 @@ namespace BulkyBook.DataAccess.Repository
             _db.Reviews.Add(review);
             return _db.SaveChanges() > 0;
         }
-        public List<Review> GetReviews(int reviewId, int shoppingCartId)
-        {
-            return _db.Reviews.Where(x => x.ReviewId == reviewId && x.ShoppingCartId == shoppingCartId).Include(x => x.ApplicationUser).ToList();
-        }
+        //public List<Review> GetReviews(int reviewId, int shoppingCartId)
+        //{
+        //    return _db.Reviews.Where(x => x.ReviewId == reviewId && x.ShoppingCartId == shoppingCartId).Include(x => x.ApplicationUser).ToList();
+        //}
     }
 }

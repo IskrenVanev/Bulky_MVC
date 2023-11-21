@@ -11,6 +11,6 @@ namespace BulkyBook.DataAccess.Repository.IRepository
     {
         void Update(Review obj);
          bool AddNewReview(Review review);
-         List<Review> GetReviews(int reviewId, int productId);
+         //List<Review> GetReviews(int reviewId, int productId);
     }
 }

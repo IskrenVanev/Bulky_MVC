@@ -27,11 +27,11 @@ namespace BulkyBook.DataAccess.Data
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.ShoppingCart)
-                .WithMany(sc => sc.Reviews)
-                .HasForeignKey(r => r.ShoppingCartId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<Review>()
+            //    .HasOne(r => r.ShoppingCart)
+            //    .WithMany(sc => sc.Reviews)
+            //    .HasForeignKey(r => r.ShoppingCartId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Action", DisplayOrder = 1 },

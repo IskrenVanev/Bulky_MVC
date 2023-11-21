@@ -151,9 +151,9 @@
     </div>
    
 </form>
-@if (Model.Reviews != null && Model.Reviews.Count > 0)
+@if (Model.Product.Reviews != null && Model.Product.Reviews.Count > 0)
 {
-    foreach (var review in Model.Reviews)
+    foreach (var review in Model.Product.Reviews)
     {
         <p class="card-text">@review.Comment</p>
     }
@@ -180,15 +180,17 @@
             <textarea class="form-control" rows="3" name="Text" placeholder="Write ur comments"></textarea>
 
         </div>
-        <button class="btn btn-success" id="btnComment" type="button">Leave a Review</button>
+        <button class="btn btn-success " id="btnComment" type="button">Leave a Review</button>
+        <br><br><br><br><br>
     </form>
     
 }
 else
 {
-    <div class="row mt-4">
+    <div class=" mt-4">
         <div class="col-md-6 offset-md-3">
             <h3 class="text-center mb-3">Log in to leave a Review!</h3>
+            
         </div>
     </div>
 }
@@ -200,12 +202,15 @@ else
             //debugger
             $.ajax({
                 type: 'post',
-                url: '@Url.Action("LeaveComment", "Comments")',
+                url: '@Url.Action("LeaveComment", "Reviews")',
                 data: $("#commentForm").serialize()
             }).done(function (response) {
                 location.reload();
             }).fail(function (XMLHttpRequest, textStatus, errorThrown) {
-                console.log("fail");
+            console.log("Ajax request failed:");
+            console.log("Status: " + textStatus);
+            console.log("Error: " + errorThrown);
+            console.log("Response Text: " + jqXHR.responseText);
                 alert("FAIL");
             })
         })

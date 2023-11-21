@@ -17,9 +17,9 @@ namespace BulkyBook.Models
 
 
 
-        public int ShoppingCartId { get; set; }
-        [ForeignKey("ShoppingCartId")]
-        public ShoppingCart ShoppingCart { get; set; }
+        public int ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public Product Product { get; set; }
 
 
         public string UserId { get; set; }

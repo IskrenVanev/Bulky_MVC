@@ -29,14 +29,14 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
             return View(productList);
         }
-        public IActionResult Details(int productId, Review? newReview)//Fix the review problem
+        public IActionResult Details(int productId)//Fix the review problem
         {
             ShoppingCart cart = new()
             {
-                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages"),
+                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages,Reviews"),
                 Count = 1,
-                ProductId = productId,
-                Reviews = _unitOfWork.Review.GetAll().ToList()
+                ProductId = productId
+               
             }; 
 
             // Update the count to be at least 1 if it's less than 1

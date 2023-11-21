@@ -17,7 +17,7 @@ namespace BulkyBook.Models.ViewModels
 
 
 
-        public int ShoppingCartId { get; set; }
+        public int ProductId { get; set; }
        
 
 

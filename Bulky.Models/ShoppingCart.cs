@@ -27,7 +27,6 @@ namespace BulkyBook.Models
         public double Price { get; set; }
 
 
-        public List<Review> Reviews { get; set; }
 
 
 
