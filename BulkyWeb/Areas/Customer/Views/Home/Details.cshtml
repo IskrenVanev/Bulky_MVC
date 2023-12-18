@@ -168,15 +168,15 @@
         <input type="hidden" name="Id" value="@Model.Product.Id" />
         <div class="mb-3">
             <label class="form-label">Write your Comment</label>
-            <span class="text-warning float-end">
+           @*  <span class="text-warning float-end">
                 <i class="ratingStar fas fa-star" data-value="1"></i>
                 <i class="ratingStar far fa-star" data-value="2"></i>
                 <i class="ratingStar far fa-star" data-value="3"></i>
                 <i class="ratingStar far fa-star" data-value="4"></i>
                 <i class="ratingStar far fa-star" data-value="5"></i>
             </span>
+        <input type="hidden" name="Rating" id="ratingsValue" value="1" />*@
 
-            <input type="hidden" name="Rating" id="ratingsValue" value="1" />
             <textarea class="form-control" rows="3" name="Text" placeholder="Write ur comments"></textarea>
 
         </div>
@@ -202,7 +202,7 @@ else
             //debugger
             $.ajax({
                 type: 'post',
-                url: '@Url.Action("LeaveComment", "Reviews")',
+            url: '@Url.Action("LeaveComment", "Reviews")',
                 data: $("#commentForm").serialize()
             }).done(function (response) {
                 location.reload();
@@ -210,7 +210,7 @@ else
             console.log("Ajax request failed:");
             console.log("Status: " + textStatus);
             console.log("Error: " + errorThrown);
-            console.log("Response Text: " + jqXHR.responseText);
+         //   console.log("Response Text: " + jqXHR.responseText);
                 alert("FAIL");
             })
         })
