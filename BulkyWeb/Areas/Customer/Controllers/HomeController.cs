@@ -18,14 +18,14 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<ApplicationUser> userManager;
+        //private readonly UserManager<ApplicationUser> userManager;
       //  private readonly IReviewRepository<Review> userManager;
 
 
 
-        public HomeController(UserManager<ApplicationUser> userManager, ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        public HomeController( ILogger<HomeController> logger, IUnitOfWork unitOfWork)
         {
-            this.userManager = userManager;
+          //  this.userManager = userManager;
             _logger = logger;
             _unitOfWork = unitOfWork;
         }
@@ -36,6 +36,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
             return View(productList);
         }
+        [HttpGet]
         public IActionResult Details(int productId)//Fix the review problem
         {
             ShoppingCart cart = new()
@@ -91,16 +92,20 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddComment(string content, int ProductId)
+        public async Task<IActionResult> AddComment( string content, int ProductId)
         {
-            var userId = this.userManager.GetUserId(this.User);
-            var userName = this.User.Identity.Name;
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userNameClaim = claimsIdentity.FindFirst(ClaimTypes.Name);
+            var userName = userNameClaim != null ? userNameClaim.Value : string.Empty;
+         
             if (content != null)
             {
+
                 await _unitOfWork.Review.AddReviewAsync(content, ProductId, userId, userName);
             }
-
-            return this.RedirectToAction("Details", new { id = ProductId });
+            ViewBag.UserName = userName;
+            return RedirectToRoute(new { controller = "Home", action = "Details", productId = ProductId });
         }
 
         public IActionResult Privacy()

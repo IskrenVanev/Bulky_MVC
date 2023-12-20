@@ -4,15 +4,7 @@
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
-<style>
-        .user_name{
-        font-size:14px;
-        font-weight: bold;
-    }
-    .comments-list .media{
-        border-bottom: 1px dotted #ccc;
-    }
-    </style>
+
 <form method="post">
     <input hidden asp-for="ProductId"/>
     <div class=" shadow border-0 mt-4 mb-4">
@@ -164,6 +156,66 @@
     </div>
    
 </form>
+@{
+    var userName = ViewBag.UserName as string;
+}
+<div class="col-md-10 offset-md-1 col-lg-10 offset-lg-1">
+    <div class="title-box-d">
+        <h3 class="title-d">Comments @Model.Product.Reviews.Count()</h3>
+    </div>
+    <div class="box-comments">
+        <ul class="list-comments">
+
+            @foreach (var review in Model.Product.Reviews)
+            {
+                <li>
+
+                    <div class="comment-details">
+                        <h4 class="comment-author">@userName</h4>
+                        <span>@review.CommentedOn</span>
+                        <p class="comment-description">
+                            @review.Comment
+                        </p>
+                    </div>
+                </li>
+            }
+
+
+        </ul>
+    </div>
+    <div class="form-comments">
+        <div class="title-box-d">
+            <h3 class="title-d"> Leave a Reply</h3>
+        </div>
+        <form asp-action="AddComment" method="post">
+            <label for="content"></label>
+            <label for="cart"></label>
+            <div class="row">
+                <div class="col-12">
+                    <textarea placeholder="Comment *" cols="45" rows="8" required class="form-control text-left" id="content" name="content"></textarea>
+                </div>
+            </div>
+            
+            <input type="hidden" name="ProductId" value="@Model.ProductId" />
+            <input type="submit" class="btn btn-a" value="Comment">
+        </form>
+
+    </div>
+</div>
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
 @* @if (Model.Product.Reviews != null && Model.Product.Reviews.Count > 0)
 {
     foreach (var review in Model.Product.Reviews)
@@ -173,7 +225,7 @@
 }
  *@
 
-
+@* 
 @if (User.Identity.IsAuthenticated)
 { 
     <div class="container">
@@ -262,7 +314,7 @@ else
             }
         }
     });
-    </script>
+    </script> *@
 
 @* <script>
         $("#btnComment").click(function () {
