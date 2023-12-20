@@ -14,33 +14,34 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         {
             _unitOfWork = unitOfWork;
         }
+
         //GET COMMENTS
-        [HttpPost]
-        public JsonResult LeaveComment(ReviewVM model)
-        {
-            Review review = new Review();
-            review.ReviewId = model.ReviewId;
-            review.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            review.Comment = model.Comment;
+        //[HttpPost]
+        //public JsonResult LeaveComment(ReviewVM model)
+        //{
+        //    Review review = new Review();
+        //    review.ReviewId = model.ReviewId;
+        //    review.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    review.Comment = model.Comment;
             
-            review.ProductId = model.ProductId;
+        //    review.ProductId = model.ProductId;
           
-            review.Rating = 1;
-            review.CommentedOn = DateTime.Now;
-            JsonResult json = new JsonResult(review);
-            var result = false;
-            result = _unitOfWork.Review.AddNewReview(review);
-            if (result)
-            {
-                return Json(new { Success = true });
-            }
-            else
-            {
-                return Json(new { Success = false, message = "Unable to perform operation" });
-            }
-           // return Json(new { Success = _unitOfWork.Review.AddNewReview(review) });
+        //    review.Rating = 1;
+        //    review.CommentedOn = DateTime.Now;
+        //    JsonResult json = new JsonResult(review);
+        //    var result = false;
+        //    result = _unitOfWork.Review.AddNewReview(review);
+        //    if (result)
+        //    {
+        //        return Json(new { Success = true });
+        //    }
+        //    else
+        //    {
+        //        return Json(new { Success = false, message = "Unable to perform operation" });
+        //    }
+        //   // return Json(new { Success = _unitOfWork.Review.AddNewReview(review) });
 
          
-        }
+        //}
     }
 }

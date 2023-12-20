@@ -6,6 +6,9 @@ using System.Security.Claims;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using BulkyBook.Models.ViewModels;
+using PusherServer;
+using BulkyBook.DataAccess.Repository;
+using Microsoft.AspNetCore.Identity;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
 {
@@ -15,10 +18,14 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-       
+        private readonly UserManager<ApplicationUser> userManager;
+      //  private readonly IReviewRepository<Review> userManager;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+
+
+        public HomeController(UserManager<ApplicationUser> userManager, ILogger<HomeController> logger, IUnitOfWork unitOfWork)
         {
+            this.userManager = userManager;
             _logger = logger;
             _unitOfWork = unitOfWork;
         }
@@ -81,6 +88,21 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
            
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AddComment(string content, int ProductId)
+        {
+            var userId = this.userManager.GetUserId(this.User);
+            var userName = this.User.Identity.Name;
+            if (content != null)
+            {
+                await _unitOfWork.Review.AddReviewAsync(content, ProductId, userId, userName);
+            }
+
+            return this.RedirectToAction("Details", new { id = ProductId });
+        }
+
         public IActionResult Privacy()
         {
             return View();
@@ -95,6 +117,22 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 }
 
 
+//public ActionResult Comments(int? id)
+//{
+//    var comments = _unitOfWork.Review.GetAll(x => x.ProductId == id).ToArray();
+//    return Json(comments);
+//}
+//[HttpPost]
+//public async Task<ActionResult> Comment(Review data)
+//{
+//    _unitOfWork.Review.Add(data);
+//    _unitOfWork.Save();
+//    var options = new PusherOptions();
+//    options.Cluster = "eu";
+//    var pusher = new Pusher("1727280", "e22c8f2ce0f973671483", "9b977010c92cc21c21f9", options);
+//    ITriggerResult result = await pusher.TriggerAsync("asp_channel", "asp_event", data);
+//    return Content("ok");
+//}
 
 
 
