@@ -27,6 +27,22 @@ namespace BulkyBook.DataAccess.Repository
             _db.Reviews.Add(review);
             return _db.SaveChanges() > 0;
         }
+        public async Task AddReviewAsync(string content, int ProductId, string userId, string email)
+        {
+            var review = new Review
+            {
+                Rating = 1,
+                Comment = content,
+                ProductId = ProductId,
+                UserId = userId,
+                CommentedOn = DateTime.UtcNow
+
+
+            };
+
+            await _db.AddAsync(review);
+            await _db.SaveChangesAsync();
+        }
         //public List<Review> GetReviews(int reviewId, int shoppingCartId)
         //{
         //    return _db.Reviews.Where(x => x.ReviewId == reviewId && x.ShoppingCartId == shoppingCartId).Include(x => x.ApplicationUser).ToList();

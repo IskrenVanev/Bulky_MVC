@@ -1,5 +1,18 @@
-﻿@model ShoppingCart
-
+﻿@using Azure.Core
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model ShoppingCart
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+<style>
+        .user_name{
+        font-size:14px;
+        font-weight: bold;
+    }
+    .comments-list .media{
+        border-bottom: 1px dotted #ccc;
+    }
+    </style>
 <form method="post">
     <input hidden asp-for="ProductId"/>
     <div class=" shadow border-0 mt-4 mb-4">
@@ -151,39 +164,44 @@
     </div>
    
 </form>
-@if (Model.Product.Reviews != null && Model.Product.Reviews.Count > 0)
+@* @if (Model.Product.Reviews != null && Model.Product.Reviews.Count > 0)
 {
     foreach (var review in Model.Product.Reviews)
     {
         <p class="card-text">@review.Comment</p>
     }
 }
-
+ *@
 
 
 @if (User.Identity.IsAuthenticated)
 { 
-    <form id="commentForm">
-        <input type="hidden" name="ProductId" value="@Model.ProductId" />
-        <input type="hidden" name="Id" value="@Model.Product.Id" />
-        <div class="mb-3">
-            <label class="form-label">Write your Comment</label>
-           @*  <span class="text-warning float-end">
-                <i class="ratingStar fas fa-star" data-value="1"></i>
-                <i class="ratingStar far fa-star" data-value="2"></i>
-                <i class="ratingStar far fa-star" data-value="3"></i>
-                <i class="ratingStar far fa-star" data-value="4"></i>
-                <i class="ratingStar far fa-star" data-value="5"></i>
-            </span>
-        <input type="hidden" name="Rating" id="ratingsValue" value="1" />*@
-
-            <textarea class="form-control" rows="3" name="Text" placeholder="Write ur comments"></textarea>
-
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="page-header">
+                    <h1><small class="pull-right">{{comments.length}} comments</small> Comments </h1>
+                </div>
+                <div class="comments-list">
+                    <div class="media" v-for="com in comments">
+                        <div class="media-body">
+                            {{ com.Comment }}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button class="btn btn-success " id="btnComment" type="button">Leave a Review</button>
-        <br><br><br><br><br>
-    </form>
-    
+    </div>
+    <div class="container">
+        <br />
+        <p>Your Comment</p>
+        <form onsubmit="return false;">
+            <input type="text" id="Name" placeholder="Your Name" v-model="comment.Name" class="form-control" />
+            <textarea rows="3" placeholder="Your Comment" id="Body" v-model="comment.Body" class="form-control"></textarea>
+            <button class="btn btn-success" v-on:click="submit_comment">save</button>
+        </form>
+    </div>
+     
 }
 else
 {
@@ -196,8 +214,57 @@ else
 }
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
                         
-                        
 <script>
+    var pusher = new Pusher('e22c8f2ce0f973671483', {
+        cluster: 'eu'
+    });
+    var my_channel = pusher.subscribe('asp_channel');
+    var app = new Vue({
+        el: '#app',
+        data: {
+            comments: [],
+            comment: {
+                Name: '',
+                Body: '',
+                BlogPostID: @Model.Product.Id
+            }
+        },
+        created: function() {
+            this.get_comments();
+            this.listen();
+        },
+        methods: {
+            get_comments: function() {
+                axios.get('@Url.Action("Comments", "Home", new { id = @Model.Product.Id })', { https: true })
+                    .then((response) => {
+    
+                        this.comments = response.data;
+    
+                    });
+    
+            },
+            listen: function() {
+                my_channel.bind("asp_event", (data) => {
+                    if (data.BlogPostID == this.comment.BlogPostID) {
+                        this.comments.push(data);
+                    }
+    
+                })
+            },
+            submit_comment: function() {
+                axios.post('@Url.Action("Comment", "Home")', this.comment, { https: true })
+                    .then((response) => {
+                        this.comment.Name = '';
+                        this.comment.Body = '';
+                        alert("Comment Submitted");
+    
+                    });
+            }
+        }
+    });
+    </script>
+
+@* <script>
         $("#btnComment").click(function () {
             //debugger
             $.ajax({
@@ -215,4 +282,4 @@ else
             })
         })
 
-</script>
+</script> *@
