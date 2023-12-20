@@ -35,6 +35,7 @@ namespace BulkyBook.DataAccess.Repository
                 Comment = content,
                 ProductId = ProductId,
                 UserId = userId,
+                ApplicationUser = _db.applicationUsers.Where(u=>u.Id == userId).ToList().FirstOrDefault(),
                 CommentedOn = DateTime.UtcNow
 
 
