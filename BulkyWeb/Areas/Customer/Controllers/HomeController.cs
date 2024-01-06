@@ -92,6 +92,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         [Authorize]
         [HttpPost]
+
         public async Task<IActionResult> AddComment( string content, int ProductId)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
@@ -105,7 +106,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                 await _unitOfWork.Review.AddReviewAsync(content, ProductId, userId, userName);
             }
             ViewBag.UserName = userName;
-            return RedirectToRoute(new { controller = "Home", action = "Details", productId = ProductId });
+            return RedirectToAction("Details", "Home", new { productId = ProductId });
         }
 
         public IActionResult Privacy()
