@@ -186,25 +186,39 @@
     <div class="form-comments">
         <div class="title-box-d">
             <h3 class="title-d"> Leave a Reply</h3>
-        </div>
-        <form asp-action="AddComment" method="post">
-            <label for="content"></label>
-            <label for="cart"></label>
-            <div class="row">
-                <div class="col-12">
-                    <textarea placeholder="Comment *" cols="45" rows="8" required class="form-control text-left" id="content" name="content"></textarea>
-                </div>
-            </div>
             
-            <input type="hidden" name="ProductId" value="@Model.ProductId" />
-            <input type="submit" class="btn btn-a" value="Comment">
-        </form>
+        </div>
 
+        @if (User.Identity.IsAuthenticated)
+        {
+            <form asp-action="AddComment" method="post">
+                <label for="content"></label>
+                <label for="cart"></label>
+                <div class="row">
+                    <div class="col-12">
+                        <textarea placeholder="Comment *" cols="45" rows="8" required class="form-control text-left" id="content" name="content"></textarea>
+                    </div>
+                </div>
+
+                <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                <input type="submit" class="btn btn-a" value="Comment">
+            </form>
+            <br />
+
+            <br />
+
+            <br />
+        }
+        else
+        {
+            <p>Please <a href="/Identity/Account/Login">log in</a> to post a comment.</p>
+            <br />
+
+            <br />
+
+            <br />
+        }
     </div>
-</div>
-              
-
-
 
 
 
