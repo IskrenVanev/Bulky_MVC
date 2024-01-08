@@ -20,14 +20,20 @@ namespace BulkyBook.DataAccess.Data
         public DbSet<ApplicationUser> applicationUsers { get; set; }
         public DbSet<OrderHeader> OrderHeaders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
             base.OnModelCreating(modelBuilder);
+            //modelBuilder.Entity<Review>()
+            //    .HasOne(r => r.ShoppingCart)
+            //    .WithMany(sc => sc.Reviews)
+            //    .HasForeignKey(r => r.ShoppingCartId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-			modelBuilder.Entity<Category>().HasData(
+            modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Action", DisplayOrder = 1 },
 			    new Category { Id = 2, Name = "SciFi", DisplayOrder = 2 },
 			    new Category { Id = 3, Name = "History", DisplayOrder = 3 });

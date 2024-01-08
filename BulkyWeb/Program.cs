@@ -8,12 +8,17 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using BulkyBook.Utility;
 using Stripe;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 internal class Program
 {
 	private static void Main(string[] args)
 	{
-		var builder = WebApplication.CreateBuilder(args);
+        var configuration = new ConfigurationBuilder()
+           .SetBasePath(Directory.GetCurrentDirectory())
+           .AddJsonFile("appsettings.json")
+           .Build();
+        var builder = WebApplication.CreateBuilder(args);
 
 		// Add services to the container.
 		builder.Services.AddControllersWithViews();
@@ -21,7 +26,7 @@ internal class Program
 
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
      
-
+            
         builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
         builder.Services.ConfigureApplicationCookie(options =>
         {
@@ -29,16 +34,17 @@ internal class Program
             options.LogoutPath = $"/Identity/Account/Logout";
             options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
         });
-        builder.Services.AddAuthentication().AddFacebook(option =>
+        builder.Services.AddAuthentication().AddFacebook(options =>
         {
-            option.AppId = "689363139720077";
-            option.AppSecret = "dd69bc61d712491ec96fa72dc06f904e";
+            options.AppId = configuration["Authentication:Facebook:AppId"];
+            options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
         });
-        builder.Services.AddAuthentication().AddMicrosoftAccount(option =>
-        {
-            option.ClientId = "164f0c8c-f889-454c-94ae-c3115e202adb";
-            option.ClientSecret = "7IL8Q~1nnQSOBuo10b9nY~_YwSRQX68aBl49ybtF";
-        });
+        builder.Services.AddAuthentication()
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = configuration["Authentication:Microsoft:ClientId"];
+                options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+            });
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
