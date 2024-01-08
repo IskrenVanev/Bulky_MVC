@@ -26,5 +26,8 @@ namespace BulkyBook.Models
         public string Role { get; set; }
 
 
+        public List<Review> Reviews { get; set; }
+
+
     }
 }

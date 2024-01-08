@@ -26,5 +26,9 @@ namespace BulkyBook.Models
         [NotMapped] 
         public double Price { get; set; }
 
+
+
+
+
     }
 }
