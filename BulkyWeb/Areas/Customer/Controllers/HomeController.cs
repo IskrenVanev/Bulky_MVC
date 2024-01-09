@@ -41,7 +41,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         {
             ShoppingCart cart = new()
             {
-                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages,Reviews"),
+                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages,Reviews.ApplicationUser"),
                 Count = 1,
                 ProductId = productId
                
@@ -52,7 +52,8 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             {
                 cart.Count = 1;
             }
-        
+            
+
             return View(cart);
         }
 
@@ -93,7 +94,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         [Authorize]
         [HttpPost]
 
-        public async Task<IActionResult> AddComment( string content, int ProductId)
+        public async Task<IActionResult> AddComment( string content, int ProductId,  int rating)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -103,9 +104,9 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             if (content != null)
             {
 
-                await _unitOfWork.Review.AddReviewAsync(content, ProductId, userId, userName);
+                await _unitOfWork.Review.AddReviewAsync(content, ProductId, userId, userName, rating);
             }
-            ViewBag.UserName = userName;
+           // TempData["UserName"] = userName;
             return RedirectToAction("Details", "Home", new { productId = ProductId });
         }
 

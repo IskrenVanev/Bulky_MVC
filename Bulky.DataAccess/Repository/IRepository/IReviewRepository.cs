@@ -12,7 +12,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         void Update(Review obj);
          bool AddNewReview(Review review);
 
-         Task AddReviewAsync(string content, int ProductId, string userId, string email);
+         Task AddReviewAsync(string content, int ProductId, string userId, string email, int rating);
          //List<Review> GetReviews(int reviewId, int productId);
     }
 }

@@ -27,11 +27,11 @@ namespace BulkyBook.DataAccess.Repository
             _db.Reviews.Add(review);
             return _db.SaveChanges() > 0;
         }
-        public async Task AddReviewAsync(string content, int ProductId, string userId, string email)
+        public async Task AddReviewAsync(string content, int ProductId, string userId, string email, int rating)
         {
             var review = new Review
             {
-                Rating = 1,
+                Rating = rating,
                 Comment = content,
                 ProductId = ProductId,
                 UserId = userId,

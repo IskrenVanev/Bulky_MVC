@@ -161,9 +161,23 @@
 @{
     var userName = ViewBag.UserName as string;
 }
+@{
+    double? sum = 0;
+    int cnt = 0;
+    foreach (var rating in @Model.Product.Reviews)
+    {
+        if (rating.Rating != 0)
+        {
+            sum += rating.Rating;
+            cnt++;
+        }
+    }
+    double? averageRating = cnt > 0 ? sum / cnt : (double?)null;
+}
 <div class="col-md-10 offset-md-1 col-lg-10 offset-lg-1">
     <div class="title-box-d">
         <h3 class="title-d">Comments @Model.Product.Reviews.Count()</h3>
+        <h3>Average rating: @averageRating?.ToString("0.0") </h3>
     </div>
     <div class="box-comments">
         <ul class="list-comments">
@@ -173,8 +187,15 @@
                 <li>
 
                     <div class="comment-details">
-                        <h4 class="comment-author">@userName</h4>
-                        <span>@review.CommentedOn</span>
+                        <h4 class="comment-author">@review.ApplicationUser.Name</h4>
+                        @if (@review.Rating != 0)
+                        {
+                            <span>Commented on: @review.CommentedOn| Rating: @review.Rating/5</span>
+                        }
+                        else
+                        {
+                            <span>Commented on: @review.CommentedOn</span>
+                        }
                         <p class="comment-description">
                             @review.Comment
                         </p>
@@ -194,6 +215,32 @@
         @if (User.Identity.IsAuthenticated)
         {
             <form asp-action="AddComment" method="post">
+                <input type="hidden" id="rating" name="rating" value="0" />
+                <div class="bodyOfStars">
+                    <div class="cardStar">
+                        
+                        <br/>
+                        <span onclick="gfg(1)"
+                              class="star">★
+                        </span>
+                        <span onclick="gfg(2)"
+                              class="star">★
+                        </span>
+                        <span onclick="gfg(3)"
+                              class="star">★
+                        </span>
+                        <span onclick="gfg(4)"
+                              class="star">★
+                        </span>
+                        <span onclick="gfg(5)"
+                              class="star">★
+                        </span>
+                       
+                    </div>
+                </div>
+
+
+
                 <label for="content"></label>
                 <label for="cart"></label>
                 <div class="row">
@@ -202,7 +249,7 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                <input type="hidden" name="ProductId" value="@Model.ProductId"/>
                 <input type="submit" class="btn btn-a" value="Comment">
             </form>
             <br />
@@ -223,7 +270,39 @@
     </div>
 
 
+<script>
+        // To access the stars
+        let stars =
+            document.getElementsByClassName("star");
+        let output =
+            document.getElementById("output");
 
+        // Funtion to update rating
+        function gfg(n) {
+            remove();
+            for (let i = 0; i < n; i++) {
+                if (n == 1) cls = "one";
+                else if (n == 2) cls = "two";
+                else if (n == 3) cls = "three";
+                else if (n == 4) cls = "four";
+                else if (n == 5) cls = "five";
+                stars[i].className = "star " + cls;
+            }
+           // output.innerText = "Rating is: " + n + "/5";
+
+            // Update the hidden input field
+            document.getElementById("rating").value = n;
+        }
+
+        // To remove the pre-applied styling
+        function remove() {
+            let i = 0;
+            while (i < 5) {
+                stars[i].className = "star";
+                i++;
+            }
+        }
+    </script>
 
 
 
