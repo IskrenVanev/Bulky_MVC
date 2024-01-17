@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook.Models", "Bulky.M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook.Utility", "Bulky.Utility\BulkyBook.Utility.csproj", "{3284258D-B2C3-4838-B134-1FE3500AC90C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkyBook.Test", "BulkyBook.Test\BulkyBook.Test.csproj", "{3C5F02E5-FBAC-44E8-98CD-78D2B32196C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BulkyBook.Test", "BulkyBook.Test\BulkyBook.Test.csproj", "{3C5F02E5-FBAC-44E8-98CD-78D2B32196C9}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{0BD36789-BDA7-4BD6-9FF9-74236EC4A559}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{3C5F02E5-FBAC-44E8-98CD-78D2B32196C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C5F02E5-FBAC-44E8-98CD-78D2B32196C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C5F02E5-FBAC-44E8-98CD-78D2B32196C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BD36789-BDA7-4BD6-9FF9-74236EC4A559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BD36789-BDA7-4BD6-9FF9-74236EC4A559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BD36789-BDA7-4BD6-9FF9-74236EC4A559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BD36789-BDA7-4BD6-9FF9-74236EC4A559}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
