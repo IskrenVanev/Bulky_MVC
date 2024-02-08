@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bulkybookweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bulkybookweb
+  template:
+    metadata:
+      labels:
+        app: bulkybookweb
+    spec:
+      containers:
+      - name: bulkybookweb
+        image: iskrenvanev/bulkybookweb
+        ports:
+        - containerPort: 8080
