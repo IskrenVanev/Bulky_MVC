@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BulkyBook.Models
 {
@@ -48,7 +49,8 @@ namespace BulkyBook.Models
         [ValidateNever]
         public List<ProductImage> ProductImages { get; set; }
 
-
+        [BindNever]
+        [ValidateNever]
         public List<Review> Reviews { get; set; }
 
     }

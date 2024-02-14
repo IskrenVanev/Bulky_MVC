@@ -50,7 +50,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             else
             {
                 //update
-                productVm.Product = _unitOfWork.Product.Get(u => u.Id == id, includeProperties:"ProductImages");
+                productVm.Product = _unitOfWork.Product.Get(u => u.Id == id, includeProperties:"ProductImages,Reviews");
                 return View("Upsert", productVm);
             }
         }
@@ -58,8 +58,8 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         public IActionResult Upsert(ProductVM productVm, List<IFormFile> files)
         {
 
-
-            if (ModelState.IsValid)
+            ModelState.Remove("Reviews");
+            if (ModelState.IsValid )
             {
                 if (productVm.Product.Id == 0)
                 {
