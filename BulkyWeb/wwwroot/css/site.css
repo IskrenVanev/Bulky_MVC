@@ -12,7 +12,7 @@ for details on configuring this project to bundle and minify static web assets. 
 }
 .container {
     padding-top: 20px; /* Add some top padding if needed */
-    min-height: 100vh; /* Set a minimum height of 100% of the viewport height */
+    /*min-height: 100vh;*/ /* Set a minimum height of 100% of the viewport height */
 }
 a.navbar-brand {
     white-space: normal;
