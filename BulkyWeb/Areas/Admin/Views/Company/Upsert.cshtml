@@ -21,7 +21,7 @@
 
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
-                      
+
                         <div class="form-floating py-2 col-12">
                             <input asp-for="PhoneNumber" class="form-control border-0 shadow" />
                             <label asp-for="PhoneNumber" class="ms-2"></label>
@@ -47,7 +47,7 @@
                             <label asp-for="PostalCode" class="ms-2"></label>
                             <span asp-validation-for="PostalCode" class="text-danger"></span>
                         </div>
-                        
+
                         <div class="row pt-2">
                             <div class="col-6 col-md-3">
                                 @if (Model.Id != 0)
@@ -71,7 +71,7 @@
 
                     </div>
                 </div>
-                
+
             </div>
 
         </form>
@@ -79,11 +79,11 @@
     </div>
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         tinymce.init({
             selector: 'textarea',
-            plugins: 'anchor autolink charmap codesample emoticons   lists   table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage  tableofcontents footnotes mergetags autocorrect typography inlinecss',
+            plugins: 'anchor autolink charmap codesample emoticons lists table visualblocks wordcount advlist table',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent  ',
 
         });
