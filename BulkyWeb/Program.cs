@@ -37,17 +37,17 @@ internal class Program
 
         //TODO: Uncomment this in order to use fb and microsoft acc authentication (also use correct appsettings.json for the stripe)
         
-        //builder.Services.AddAuthentication().AddFacebook(options =>
-        //{
-        //    options.AppId = configuration["Authentication:Facebook:AppId"];
-        //    options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-        //});
-        //builder.Services.AddAuthentication()
-        //    .AddMicrosoftAccount(options =>
-        //    {
-        //        options.ClientId = configuration["Authentication:Microsoft:ClientId"];
-        //        options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-        //    });
+        builder.Services.AddAuthentication().AddFacebook(options =>
+        {
+            options.AppId = configuration["Authentication:Facebook:AppId"];
+            options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+        });
+        builder.Services.AddAuthentication()
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = configuration["Authentication:Microsoft:ClientId"];
+                options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+            });
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
