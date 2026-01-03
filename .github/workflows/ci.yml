@@ -1,0 +1,63 @@
+name: CI - Docker Build & Health Check
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
+      AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
+      AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
+      AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+      STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+
+    steps:
+    # 1️⃣ Checkout repo
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2️⃣ Setup Docker Buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # 3️⃣ Verify required secrets exist (fail fast)
+    - name: Verify secrets
+      run: |
+        test -n "$AUTH_FACEBOOK_APP_ID"
+        test -n "$AUTH_FACEBOOK_APP_SECRET"
+        test -n "$AUTH_MICROSOFT_CLIENT_ID"
+        test -n "$AUTH_MICROSOFT_CLIENT_SECRET"
+        test -n "$STRIPE_SECRET_KEY"
+
+    # 4️⃣ Build Docker images
+    - name: Build Docker images
+      run: docker compose build
+
+    # 5️⃣ Start containers
+    - name: Start containers
+      run: docker compose up -d
+
+    # 6️⃣ Wait for app to boot
+    - name: Wait for app startup
+      run: sleep 40
+
+    # 7️⃣ Health check
+    - name: Health check
+      run: curl --fail http://localhost:32768/health
+
+    # 8️⃣ Show container logs on failure (debugging)
+    - name: Show logs if failed
+      if: failure()
+      run: docker compose logs
+
+    # 9️⃣ Shut down containers
+    - name: Stop containers
+      if: always()
+      run: docker compose down
