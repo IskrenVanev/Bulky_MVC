@@ -10,16 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
-      AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
-      AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
-      AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
-      STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-
     steps:
-    # 1️⃣ Checkout repo
+    # 1️⃣ Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -35,14 +27,35 @@ jobs:
         test -n "$AUTH_MICROSOFT_CLIENT_ID"
         test -n "$AUTH_MICROSOFT_CLIENT_SECRET"
         test -n "$STRIPE_SECRET_KEY"
+      env:
+        AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
+        AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
+        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
+        AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
     # 4️⃣ Build Docker images
     - name: Build Docker images
       run: docker compose build
+      env:
+        AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
+        AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
+        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
+        AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
     # 5️⃣ Start containers
     - name: Start containers
       run: docker compose up -d
+      env:
+        AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
+        AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
+        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
+        AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
     # 6️⃣ Wait for app to boot
     - name: Wait for app startup
