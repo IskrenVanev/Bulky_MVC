@@ -8,6 +8,12 @@ services:
       - "32768:8080"
     environment:
         ASPNETCORE_URLS: http://+:8080
+        Authentication__Facebook__AppId: ${AUTH_FACEBOOK_APP_ID}
+        Authentication__Facebook__AppSecret: ${AUTH_FACEBOOK_APP_SECRET}
+        Authentication__Microsoft__ClientId: ${AUTH_MICROSOFT_CLIENT_ID}
+        Authentication__Microsoft__ClientSecret: ${AUTH_MICROSOFT_CLIENT_SECRET}
+        Stripe__PublishableKey: ${STRIPE_PUBLISHABLE_KEY}
+        Stripe__SecretKey: ${STRIPE_SECRET_KEY}
     depends_on:
       - mssql
 
