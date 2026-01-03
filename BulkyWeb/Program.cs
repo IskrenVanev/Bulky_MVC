@@ -14,14 +14,18 @@ internal class Program
 {
 	private static void Main(string[] args)
 	{
-        var configuration = new ConfigurationBuilder()
-           .SetBasePath(Directory.GetCurrentDirectory())  
-           .AddJsonFile("appsettings.json")
-           .Build();
-        var builder = WebApplication.CreateBuilder(args);
+        //var configuration = new ConfigurationBuilder()
+        //   .SetBasePath(Directory.GetCurrentDirectory())  
+        //   .AddJsonFile("appsettings.json")
+        //   .Build();
+        //var builder = WebApplication.CreateBuilder(args);
 
-		// Add services to the container.
-		builder.Services.AddControllersWithViews();
+        var builder = WebApplication.CreateBuilder(args);
+        var configuration = builder.Configuration; // Use builder.Configuration directly
+
+
+        // Add services to the container.
+        builder.Services.AddControllersWithViews();
 		builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
@@ -36,18 +40,34 @@ internal class Program
         });
 
         //TODO: Uncomment this in order to use fb and microsoft acc authentication (also use correct appsettings.json for the stripe)
-        
-        builder.Services.AddAuthentication().AddFacebook(options =>
+
+        //builder.Services.AddAuthentication().AddFacebook(options =>
+        //{
+        //    options.AppId = configuration["Authentication:Facebook:AppId"];
+        //    options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+        //});
+        //builder.Services.AddAuthentication()
+        //    .AddMicrosoftAccount(options =>
+        //    {
+        //        options.ClientId = configuration["Authentication:Microsoft:ClientId"];
+        //        options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+        //    });
+
+        builder.Services.AddAuthentication(options =>
         {
-            options.AppId = configuration["Authentication:Facebook:AppId"];
-            options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+            options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        })
+        .AddFacebook(fb =>
+        {
+            fb.AppId = configuration["Authentication:Facebook:AppId"];
+            fb.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+        })
+        .AddMicrosoftAccount(ms =>
+        {
+            ms.ClientId = configuration["Authentication:Microsoft:ClientId"];
+            ms.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
         });
-        builder.Services.AddAuthentication()
-            .AddMicrosoftAccount(options =>
-            {
-                options.ClientId = configuration["Authentication:Microsoft:ClientId"];
-                options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-            });
+
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
@@ -74,10 +94,10 @@ internal class Program
 			app.UseHsts();
 		}
 
-		app.UseHttpsRedirection();
+		//app.UseHttpsRedirection();
 		app.UseStaticFiles();
-        StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
-		app.UseRouting();
+        StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+        app.UseRouting();
 		app.UseAuthentication();
 		app.UseAuthorization();
         app.UseSession();
