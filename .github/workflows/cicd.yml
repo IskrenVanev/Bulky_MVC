@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repository
+    # 1️ Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2️⃣ Setup Docker Buildx
+    # 2️ Setup Docker Buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    # 3️⃣ Verify required secrets exist (fail fast)
+    # 3️ Verify required secrets exist (fail fast)
     - name: Verify secrets
       run: |
         test -n "$AUTH_FACEBOOK_APP_ID"
@@ -35,7 +35,7 @@ jobs:
         STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
-    # 4️⃣ Build Docker images
+    # 4️ Build Docker images
     - name: Build Docker images
       run: docker compose build
       env:
@@ -46,7 +46,7 @@ jobs:
         STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
-    # 5️⃣ Start containers
+    # 5️ Start containers
     - name: Start containers
       run: docker compose up -d
       env:
@@ -57,25 +57,25 @@ jobs:
         STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
-    # 6️⃣ Wait for app to boot
+    # 6️ Wait for app to boot
     - name: Wait for app startup
       run: sleep 40
 
-    # 7️⃣ Health check
+    # 7️ Health check
     - name: Health check
       run: curl --fail http://localhost:32768/health
 
-    # 8️⃣ Show container logs on failure (debugging)
+    # 8️ Show container logs on failure (debugging)
     - name: Show logs if failed
       if: failure()
       run: docker compose logs
 
-    # 9️⃣ Shut down containers
+    # 9️ Shut down containers
     - name: Stop containers
       if: always()
       run: docker compose down
     
-    # 🔟 Configure AWS credentials
+    # 10 Configure AWS credentials
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -83,17 +83,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    # 1️⃣1️⃣ Login to Amazon ECR
+    # 11 Login to Amazon ECR
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
 
-    # 1️⃣2️⃣ Tag Docker image
+    # 1️2 Tag Docker image
     - name: Tag Docker image
       run: |
         docker tag bulkybookweb:latest \
         ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
-    # 1️⃣3️⃣ Push image to Amazon ECR
+    # 1️3 Push image to Amazon ECR
     - name: Push Docker image to ECR
       run: |
         docker push \
