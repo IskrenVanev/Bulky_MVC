@@ -67,7 +67,7 @@ internal class Program
             ms.ClientId = configuration["Authentication:Microsoft:ClientId"];
             ms.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
         });
-
+        //test cicd
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
