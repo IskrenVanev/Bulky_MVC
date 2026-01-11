@@ -3,21 +3,23 @@ name: CI/CD - Docker Build, Test & Push to ECR
 on:
   push:
     branches: ["master"]
+  pull_request:
+    branches: ["master"]
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout repository
+    # 1️⃣ Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Set up Docker Buildx
+    # 2️⃣ Setup Docker Buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    # Verify required secrets
+    # 3️⃣ Verify required secrets exist (fail fast)
     - name: Verify secrets
       run: |
         test -n "$AUTH_FACEBOOK_APP_ID"
@@ -28,11 +30,12 @@ jobs:
       env:
         AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
         AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
-        AUTH_MICROSOSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
+        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
         AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
-    # Build Docker images
+    # 4️⃣ Build Docker images
     - name: Build Docker images
       run: docker compose build
       env:
@@ -40,47 +43,34 @@ jobs:
         AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
         AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
         AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
-    # Start containers
+    # 5️⃣ Start containers
     - name: Start containers
       run: docker compose up -d
+      env:
+        AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
+        AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
+        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
+        AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
+        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
-    # Wait for app
+    # 6️⃣ Wait for app to boot
     - name: Wait for app startup
       run: sleep 40
 
-    # Health check
+    # 7️⃣ Health check
     - name: Health check
       run: curl --fail http://localhost:32768/health
 
-    # Configure AWS credentials
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    # Login to Amazon ECR
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
-
-    # Build & push image to ECR
-    - name: Build and push image to ECR
-      run: |
-        IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
-        docker build -t $IMAGE_URI:latest .
-        docker tag $IMAGE_URI:latest $IMAGE_URI:${{ github.sha }}
-        docker push $IMAGE_URI:latest
-        docker push $IMAGE_URI:${{ github.sha }}
-
-    # Logs if failure
+    # 8️⃣ Show container logs on failure (debugging)
     - name: Show logs if failed
       if: failure()
       run: docker compose logs
 
-    # Shutdown
+    # 9️⃣ Shut down containers
     - name: Stop containers
       if: always()
       run: docker compose down
