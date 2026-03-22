@@ -2,16 +2,17 @@
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using BulkyBookWeb.Services;
 
 namespace BulkyBookWeb.ViewComponents
 {
     public class ShoppingCartViewComponent: ViewComponent
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICartService _cartService;
 
-        public ShoppingCartViewComponent(IUnitOfWork unitOfWork)
+        public ShoppingCartViewComponent(ICartService cartService)
         {
-            _unitOfWork = unitOfWork;
+            _cartService = cartService;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
@@ -22,8 +23,7 @@ namespace BulkyBookWeb.ViewComponents
             {
                 if (HttpContext.Session.GetInt32(SD.SessionCart) == null)
                 {
-                    HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(u =>
-                        u.ApplicationUserId == claim.Value).Count());
+                    HttpContext.Session.SetInt32(SD.SessionCart, _cartService.GetCartCount(claim.Value));
                 }
                
                 return View(HttpContext.Session.GetInt32(SD.SessionCart));
