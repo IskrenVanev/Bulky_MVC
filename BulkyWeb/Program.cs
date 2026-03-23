@@ -46,20 +46,32 @@ internal class Program
             options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
         });
 
-        builder.Services.AddAuthentication(options =>
+        var authBuilder = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        })
-        .AddFacebook(fb =>
-        {
-            fb.AppId = configuration["Authentication:Facebook:AppId"] ?? Environment.GetEnvironmentVariable("AUTH_FACEBOOK_APP_ID") ?? string.Empty;
-            fb.AppSecret = configuration["Authentication:Facebook:AppSecret"] ?? Environment.GetEnvironmentVariable("AUTH_FACEBOOK_APP_SECRET") ?? string.Empty;
-        })
-        .AddMicrosoftAccount(ms =>
-        {
-            ms.ClientId = configuration["Authentication:Microsoft:ClientId"] ?? Environment.GetEnvironmentVariable("AUTH_MICROSOFT_CLIENT_ID") ?? string.Empty;
-            ms.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? Environment.GetEnvironmentVariable("AUTH_MICROSOFT_CLIENT_SECRET") ?? string.Empty;
         });
+
+        var facebookAppId = configuration["Authentication:Facebook:AppId"] ?? Environment.GetEnvironmentVariable("AUTH_FACEBOOK_APP_ID");
+        var facebookAppSecret = configuration["Authentication:Facebook:AppSecret"] ?? Environment.GetEnvironmentVariable("AUTH_FACEBOOK_APP_SECRET");
+        if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret))
+        {
+            authBuilder.AddFacebook(fb =>
+            {
+                fb.AppId = facebookAppId;
+                fb.AppSecret = facebookAppSecret;
+            });
+        }
+
+        var microsoftClientId = configuration["Authentication:Microsoft:ClientId"] ?? Environment.GetEnvironmentVariable("AUTH_MICROSOFT_CLIENT_ID");
+        var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? Environment.GetEnvironmentVariable("AUTH_MICROSOFT_CLIENT_SECRET");
+        if (!string.IsNullOrWhiteSpace(microsoftClientId) && !string.IsNullOrWhiteSpace(microsoftClientSecret))
+        {
+            authBuilder.AddMicrosoftAccount(ms =>
+            {
+                ms.ClientId = microsoftClientId;
+                ms.ClientSecret = microsoftClientSecret;
+            });
+        }
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
