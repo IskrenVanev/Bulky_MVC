@@ -1,30 +1,8 @@
 ﻿@model IEnumerable<Product>
 @{
-    var status = Context.Request.Query["status"];
-    var Action = "text-primary";
-    var SciFi = "text-primary";
-    var History = "text-primary";
-    var Horror = "text-primary";
-    var all = "text-primary";
-    switch (status)
-    {
-        case "Action":
-            Action = "active text-white bg-primary";
-            break;
-        case "SciFi":
-            SciFi = "active text-white bg-primary";
-            break;
-        case "History":
-            History = "active text-white bg-primary";
-            break;
-        case "Horror":
-            Horror = "active text-white bg-primary";
-            break;
-        default:
-            all = "active text-white bg-primary";
-            break;
-        
-    }
+    var status = Context.Request.Query["status"].ToString();
+    var categoryList = ViewBag.CategoryList as IEnumerable<Category>;
+    var allActive = string.IsNullOrEmpty(status) || status.Equals("all", StringComparison.OrdinalIgnoreCase) ? "active text-white bg-primary" : "text-primary";
 }
 
 
@@ -34,41 +12,24 @@
     <div class="filter-box">
         <div>
             <ul class="list-group list-group-horizontal-sm mx-auto justify-content-center">
-                <a style="text-decoration:none;" asp-controller="Home" asp-action="Index" asp-route-status="all">
-                    <li class="list-group-item @all">
+                <a style="text-decoration:none;" asp-area="Customer" asp-controller="Home" asp-action="Index" asp-route-status="all">
+                    <li class="list-group-item @allActive">
                         All
                     </li>
-
                 </a>
 
-
-                <a style="text-decoration:none;" asp-controller="Home" asp-action="Index" asp-route-status="Action">
-                    <li class="list-group-item @Action">
-                        Action
-                    </li>
-
-                </a>
-
-                <a style="text-decoration:none;" asp-controller="Home" asp-action="Index" asp-route-status="SciFi">
-                    <li class="list-group-item @SciFi">
-                        SciFi
-                    </li>
-
-                </a>
-                <a style="text-decoration:none;" asp-controller="Home" asp-action="Index" asp-route-status="History">
-                    <li class="list-group-item @History">
-                        History
-                    </li>
-
-                </a>
-                <a style="text-decoration:none;" asp-controller="Home" asp-action="Index" asp-route-status="Horror">
-                    <li class="list-group-item @Horror">
-                        Horror
-                    </li>
-
-                </a>
-
-
+                @if (categoryList != null)
+                {
+                    foreach (var category in categoryList)
+                    {
+                        var isActive = status.Equals(category.Name, StringComparison.OrdinalIgnoreCase) ? "active text-white bg-primary" : "text-primary";
+                        <a style="text-decoration:none;" asp-area="Customer" asp-controller="Home" asp-action="Index" asp-route-status="@category.Name">
+                            <li class="list-group-item @isActive">
+                                @category.Name
+                            </li>
+                        </a>
+                    }
+                }
             </ul>
         </div>
     </div>
@@ -80,59 +41,56 @@
     {
         var category = product.Category?.Name ?? "uncategorized";
 
-        @if (status.Count == 0 || status[0] == "all" || category == status[0])
-        {
-            <div class="col-lg-3 col-sm-6 pb-4" data-category="@category">
-                <div class="row p-2">
-                    <div class="col-12 p-1">
-                        <div class="card border-0 p-3 shadow border-top border-5 rounded">
-                            @if (product.ProductImages != null && product.ProductImages.Count() > 0)
-                            {
-                                <img src="@product.ProductImages.FirstOrDefault().ImageUrl" class="card-img-top rounded"/>
-                            }
-                            else
-                            {
-                                <img src="https://placehold.co/500x600/png" class="card-img-top rounded"/>
-                            }
+        <div class="col-lg-3 col-sm-6 pb-4" data-category="@category">
+            <div class="row p-2">
+                <div class="col-12 p-1">
+                    <div class="card border-0 p-3 shadow border-top border-5 rounded">
+                        @if (product.ProductImages != null && product.ProductImages.Count() > 0)
+                        {
+                            <img src="@product.ProductImages.FirstOrDefault().ImageUrl" class="card-img-top rounded"/>
+                        }
+                        else
+                        {
+                            <img src="https://placehold.co/500x600/png" class="card-img-top rounded"/>
+                        }
 
-                            <div class="card-body pb-0">
-                                <div class="pl-1">
-                                    <p class="card-title h5 text-dark opacity-75 text-uppercase text-center">@product.Title</p>
-                                    <p class="card-title text-warning text-center">by <b>@product.Author</b></p>
-                                </div>
-                                <div class="pl-1">
-                                    <p class=" text-dark text-opacity-75 text-center mb-0">
-                                        List price:
-                                        <span class="text-decoration-line-through">
-                                            @product.ListPrice.ToString("c")
-                                        </span>
-                                    </p>
-                                </div>
-                                <div class="pl-1">
-                                    <p class=" text-dark text-opacity-75 text-center">
-                                        As low as:
-                                        <span>
-                                            @product.Price100.ToString("c")
-                                        </span>
-                                    </p>
-                                </div>
-                                <a asp-action="Details"
-                                   asp-route-productId="@product.Id"
-                                   class="btn btn-primary bg-gradient border-0 form-control">
-                                    Details
-                                </a>
+                        <div class="card-body pb-0">
+                            <div class="pl-1">
+                                <p class="card-title h5 text-dark opacity-75 text-uppercase text-center">@product.Title</p>
+                                <p class="card-title text-warning text-center">by <b>@product.Author</b></p>
                             </div>
+                            <div class="pl-1">
+                                <p class=" text-dark text-opacity-75 text-center mb-0">
+                                    List price:
+                                    <span class="text-decoration-line-through">
+                                        @product.ListPrice.ToString("c")
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="pl-1">
+                                <p class=" text-dark text-opacity-75 text-center">
+                                    As low as:
+                                    <span>
+                                        @product.Price100.ToString("c")
+                                    </span>
+                                </p>
+                            </div>
+                            <a asp-action="Details"
+                               asp-route-productId="@product.Id"
+                               class="btn btn-primary bg-gradient border-0 form-control">
+                                Details
+                            </a>
                         </div>
-
                     </div>
+
                 </div>
             </div>
-        }
+        </div>
     }
-    @if (!Model.Any() || !Model.Any(product => status.Count == 0 || status[0] == "all" || product.Category?.Name == status[0]))
+    @if (!Model.Any())
     {
         <div class="col-12 mb-5">
-            <h1 class="text-center mt-5">Sorry, there are no @status[0] books :(</h1>
+            <h1 class="text-center mt-5">Sorry, there are no @(string.IsNullOrEmpty(status) || status.Equals("all", StringComparison.OrdinalIgnoreCase) ? "" : status) books :(</h1>
         </div>
     }
 </div>

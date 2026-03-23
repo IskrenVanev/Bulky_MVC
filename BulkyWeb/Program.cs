@@ -6,27 +6,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using BulkyBook.Utility;
+using BulkyBookWeb.Services;
 using Stripe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 internal class Program
 {
 	private static void Main(string[] args)
 	{
-        //var configuration = new ConfigurationBuilder()
-        //   .SetBasePath(Directory.GetCurrentDirectory())  
-        //   .AddJsonFile("appsettings.json")
-        //   .Build();
-        //var builder = WebApplication.CreateBuilder(args);
-
         var builder = WebApplication.CreateBuilder(args);
-        var configuration = builder.Configuration; // Use builder.Configuration directly
+        
+        // Set default culture to en-US
+        var cultureInfo = new CultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+        CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
+        var configuration = builder.Configuration; // Use builder.Configuration directly
+ 
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException("Connection string 'DefaultConnection' was not provided.");
+        }
  
         // Add services to the container.
         builder.Services.AddControllersWithViews();
-		builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+		builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
         
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
      
@@ -39,35 +46,32 @@ internal class Program
             options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
         });
 
-        //TODO: Uncomment this in order to use fb and microsoft acc authentication (also use correct appsettings.json for the stripe)
-
-        //builder.Services.AddAuthentication().AddFacebook(options =>
-        //{
-        //    options.AppId = configuration["Authentication:Facebook:AppId"];
-        //    options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-        //});
-        //builder.Services.AddAuthentication()
-        //    .AddMicrosoftAccount(options =>
-        //    {
-        //        options.ClientId = configuration["Authentication:Microsoft:ClientId"];
-        //        options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-        //    });
-
-        builder.Services.AddAuthentication(options =>
+        var authBuilder = builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        })
-        .AddFacebook(fb =>
-        {
-            fb.AppId = configuration["Authentication:Facebook:AppId"];
-            fb.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-        })
-        .AddMicrosoftAccount(ms =>
-        {
-            ms.ClientId = configuration["Authentication:Microsoft:ClientId"];
-            ms.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
         });
-        //test cicd
+
+        var facebookAppId = configuration["Authentication:Facebook:AppId"] ?? Environment.GetEnvironmentVariable("AUTH_FACEBOOK_APP_ID");
+        var facebookAppSecret = configuration["Authentication:Facebook:AppSecret"] ?? Environment.GetEnvironmentVariable("AUTH_FACEBOOK_APP_SECRET");
+        if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret))
+        {
+            authBuilder.AddFacebook(fb =>
+            {
+                fb.AppId = facebookAppId;
+                fb.AppSecret = facebookAppSecret;
+            });
+        }
+
+        var microsoftClientId = configuration["Authentication:Microsoft:ClientId"] ?? Environment.GetEnvironmentVariable("AUTH_MICROSOFT_CLIENT_ID");
+        var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? Environment.GetEnvironmentVariable("AUTH_MICROSOFT_CLIENT_SECRET");
+        if (!string.IsNullOrWhiteSpace(microsoftClientId) && !string.IsNullOrWhiteSpace(microsoftClientSecret))
+        {
+            authBuilder.AddMicrosoftAccount(ms =>
+            {
+                ms.ClientId = microsoftClientId;
+                ms.ClientSecret = microsoftClientSecret;
+            });
+        }
 
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
@@ -82,9 +86,25 @@ internal class Program
         builder.Services.AddRazorPages();
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+		builder.Services.AddScoped<ICategoryService, CategoryService>();
+		builder.Services.AddScoped<ICompanyService, CompanyService>();
+		builder.Services.AddScoped<IOrderService, OrderService>();
+		builder.Services.AddScoped<IProductService, BulkyBookWeb.Services.ProductService>();
+		builder.Services.AddScoped<IUserService, UserService>();
+		builder.Services.AddScoped<ICartService, CartService>();
+		builder.Services.AddScoped<IHomeService, HomeService>();
 		builder.Services.AddScoped<IEmailSender, EmailSender>();
         builder.Services.AddHealthChecks();
 		var app = builder.Build();
+
+        var supportedCultures = new[] { "en-US" };
+        var localizationOptions = new RequestLocalizationOptions()
+            .SetDefaultCulture(supportedCultures[0])
+            .AddSupportedCultures(supportedCultures)
+            .AddSupportedUICultures(supportedCultures);
+
+        app.UseRequestLocalization(localizationOptions);
+
         app.MapHealthChecks("/health");
 		// Configure the HTTP request pipeline.
 		if (!app.Environment.IsDevelopment())
@@ -112,15 +132,26 @@ internal class Program
 
         void SeedDatabase()
         {
-            using (var scope = app.Services.CreateScope())
+            const int maxRetries = 12;
+            const int delaySeconds = 5;
+
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-              var dbInitializer =  scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-                dbInitializer.Initialize();
+                try
+                {
+                    using var scope = app.Services.CreateScope();
+                    var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                    dbInitializer.Initialize();
+                    return;
+                }
+                catch when (attempt < maxRetries)
+                {
+                    Console.WriteLine($"Database initialization attempt {attempt} failed. Retrying in {delaySeconds} seconds...");
+                    System.Threading.Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
+                }
             }
+
+            throw new InvalidOperationException("Database initialization failed after multiple attempts.");
         }
-
     }
-
-    
 }
-
