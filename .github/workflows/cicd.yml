@@ -22,44 +22,38 @@ jobs:
     # 3️ Verify required secrets exist (fail fast)
     - name: Verify secrets
       run: |
-        test -n "$AUTH_FACEBOOK_APP_ID"
-        test -n "$AUTH_FACEBOOK_APP_SECRET"
-        test -n "$AUTH_MICROSOFT_CLIENT_ID"
-        test -n "$AUTH_MICROSOFT_CLIENT_SECRET"
         test -n "$CONNECTIONSTRINGS__DEFAULTCONNECTION"
-        test -n "$STRIPE_SECRET_KEY"
       env:
+        CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
+
+    # 3.1 Create .env file for docker compose
+    - name: Create .env for CI
+      run: |
+        cat > .env <<EOF
+        ConnectionStrings__DefaultConnection=${CONNECTIONSTRINGS__DEFAULTCONNECTION}
+        AUTH_FACEBOOK_APP_ID=${AUTH_FACEBOOK_APP_ID}
+        AUTH_FACEBOOK_APP_SECRET=${AUTH_FACEBOOK_APP_SECRET}
+        AUTH_MICROSOFT_CLIENT_ID=${AUTH_MICROSOFT_CLIENT_ID}
+        AUTH_MICROSOFT_CLIENT_SECRET=${AUTH_MICROSOFT_CLIENT_SECRET}
+        Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY}
+        Stripe__SecretKey=${STRIPE_SECRET_KEY}
+        EOF
+      env:
+        CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
         AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
         AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
         AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
         AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
-        CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
         STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
     # 4️ Build Docker images
     - name: Build Docker images
-      run: docker compose build
-      env:
-        AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
-        AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
-        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
-        AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
-        CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
-        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      run: docker compose -f docker-compose.yml build
 
     # 5️ Start containers
     - name: Start containers
-      run: docker compose up -d
-      env:
-        AUTH_FACEBOOK_APP_ID: ${{ secrets.AUTH_FACEBOOK_APP_ID }}
-        AUTH_FACEBOOK_APP_SECRET: ${{ secrets.AUTH_FACEBOOK_APP_SECRET }}
-        AUTH_MICROSOFT_CLIENT_ID: ${{ secrets.AUTH_MICROSOFT_CLIENT_ID }}
-        AUTH_MICROSOFT_CLIENT_SECRET: ${{ secrets.AUTH_MICROSOFT_CLIENT_SECRET }}
-        CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
-        STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      run: docker compose -f docker-compose.yml up -d
 
     # 6️ Wait for app to boot
     - name: Wait for app startup
@@ -72,12 +66,12 @@ jobs:
     # 8️ Show container logs on failure (debugging)
     - name: Show logs if failed
       if: failure()
-      run: docker compose logs
+      run: docker compose -f docker-compose.yml logs
 
     # 9️ Shut down containers
     - name: Stop containers
       if: always()
-      run: docker compose down
+      run: docker compose -f docker-compose.yml down
     
     # 10 Configure AWS credentials
     - name: Configure AWS credentials
