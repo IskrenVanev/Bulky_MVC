@@ -21,6 +21,7 @@
 - `Stripe`
 - `Docker / Docker Compose`
 - `GitHub Actions`
+- `Amazon Web Services (AWS)` - ECR for container image hosting
 
 ## Repository Structure
 
