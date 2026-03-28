@@ -1,101 +1,124 @@
 # Bulky_MVC
-Bulky_MVC is a web application designed for bulk book purchases, featuring separate admin and customer areas.
-## Table of Contents
-1. Introduction
-2. Getting Started
-- Installation
-- Configuration
-3. Usage
-4. Project Structure
-5. Contributing
 
-  
-## Introduction
-Bulky_MVC is a web application built on the MVC (Model-View-Controller) architecture.
-The platform facilitates bulk book purchases with dedicated admin and customer areas,
-providing a seamless experience for both user types.
+`Bulky_MVC` is an ASP.NET Core MVC e-commerce application for book sales, with separate admin and customer experiences, role-based behavior, Stripe integration, and containerized local development.
 
+## Features
 
-## Getting Started
+- Admin area for categories, products, companies, orders, and user management
+- Customer area for browsing products, cart, checkout, and order flow
+- Role-based behavior (`Admin`, `Employee`, `Company`, `Customer`)
+- Entity Framework Core + SQL Server
+- Optional external login providers (Facebook, Microsoft)
+- Dockerized app + database setup
+- GitHub Actions CI/CD pipeline with Docker build, health check, and optional ECR push
 
-## Installation
+## Tech Stack
+
+- `.NET 8`
+- `ASP.NET Core MVC`
+- `Entity Framework Core`
+- `SQL Server 2022` (container in Docker setup)
+- `Stripe`
+- `Docker / Docker Compose`
+- `GitHub Actions`
+
+## Repository Structure
+
+- `BulkyWeb` - main web application (MVC, areas, views, services)
+- `Bulky.DataAccess` - DbContext, repositories, migrations, DB initializer
+- `Bulky.Models` - domain models and view models
+- `Bulky.Utility` - shared utility classes and constants
+- `BulkyBook.Test` - test project
+- `.github/workflows/cicd.yml` - CI/CD workflow
+- `docker-compose.yml` - base Docker setup for app + SQL Server
 
 ## Prerequisites
-Make sure you have the following software installed on your machine:
 
-- **Visual Studio:** I recommend using Visual Studio 2022 Preview.
-- **.NET SDK:** Ensure you have the .NET SDK installed, targeting the `net8.0` framework.
+- `.NET SDK 8`
+- `Docker Desktop` (for containerized run)
+- (Optional) `Visual Studio 2022`
 
-1. Clone the repository:
-- git clone https://github.com/isko02/Bulky_MVC.git
-- cd Bulky_MVC
+## Running Locally (Docker - Recommended)
 
-2. Open the Project:
+1. Clone the repository.
+2. Create a `.env` file in the repository root.
+3. Add at minimum:
 
-- Open the Bulky_MVC.sln solution file in Visual Studio.
+```env
+ConnectionStrings__DefaultConnection=
+```
 
-3. Configure the Database:
+4. Optional keys (for OAuth / Stripe):
 
-- Open appsettings.json and update the connection string in the DefaultConnection section to point to your desired database.
+```env
+AUTH_FACEBOOK_APP_ID=
+AUTH_FACEBOOK_APP_SECRET=
+AUTH_MICROSOFT_CLIENT_ID=
+AUTH_MICROSOFT_CLIENT_SECRET=
+Stripe__PublishableKey=
+Stripe__SecretKey=
+```
 
-"ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=Bulky;Trusted_Connection=True;TrustServerCertificate=True"
+5. Start containers:
 
-  },
+```bash
+docker compose up --build
+```
 
-4. Run Migrations:
+6. Open the app:
 
-Open the Package Manager Console in Visual Studio and run the following command:
-Update-Database
-- This will apply the database migrations and create the necessary tables.
+- `http://localhost:32768`
+- Health endpoint: `http://localhost:32768/health`
 
-5. Run the Application
-6. Explore the Application
+## Running Locally (Without Docker)
 
-- Default User: 
-Use the following default user to log in and explore different areas of the application:
+1. Open `Bulky.sln`.
+2. Configure your connection string using environment variables or user secrets.
+3. Apply migrations/database update.
+4. Run `BulkyWeb`.
 
-- Admin Area:
-Email: admin@iskren.com, 
-Password: Qqq123*
+## Authentication Notes
 
-- Customer Area:
-Create a new user by clicking "Register".
+- External providers are registered only when their required credentials are available.
+- If Facebook or Microsoft keys are missing, the app still runs (provider is skipped).
+- For Microsoft login in local Docker, register redirect URI:
 
+`http://localhost:32768/signin-microsoft`
 
-## Usage
-Bulky_MVC is designed to make bulk book purchases easy and efficient. The application is divided into two main areas:
+## CI/CD Notes
 
-## Admin Area
-- The admin can create, edit and delete categories of books
-- The admin can create, edit and delete  book companies
-- The admin can manage orders.
-- The admin can create, edit and delete books
-- The admin can manage users.
-## Customer Area
-- The customer can order different books 
-- The customer can manage his cart
+Workflow file: `.github/workflows/cicd.yml`
 
-## Employee role: 
-- The employees can manage orders
-## Company role: 
-- If a company orders books it has 30 days to pay for them
+Pipeline behavior:
 
+- Builds and starts Docker services
+- Performs health check with retries
+- Always prints logs on failure
+- Stops containers in cleanup step
+- Pushes to ECR only on `push` to `master`
 
-## Project Structure:
-1. Data Access (It contains the DbContext, DbInitializer which creates 1 default admin user, all migrations, Repository pattern)
-2. Models (It contains all models and viewmodels)
-3. Utility (It contains helper classes)
-4. Test (It contains NUnit tests)
-5. BulkyWeb (It contains the 2 areas, views and view components, wwwroot folder and appsettings.json)
-6. BulkyWebRazor_Temp (Temporary project that I used so I can learn more about Razor pages.)
+Required GitHub secret:
 
+- `CONNECTIONSTRINGS__DEFAULTCONNECTION`
+
+Optional GitHub secrets:
+
+- `AUTH_FACEBOOK_APP_ID`
+- `AUTH_FACEBOOK_APP_SECRET`
+- `AUTH_MICROSOFT_CLIENT_ID`
+- `AUTH_MICROSOFT_CLIENT_SECRET`
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- AWS/ECR secrets for publish step
+
+## Default Seeded Admin
+
+The database initializer seeds an admin user/roles. If you changed seed settings, use your current seeded credentials.
 
 ## Contributing
-I welcome contributions to enhance Bulky_MVC. Follow these steps to contribute:
 
 1. Fork the repository
-2. Create a new branch
+2. Create a feature branch
 3. Make your changes
 4. Open a pull request
 
