@@ -4,6 +4,7 @@ using BulkyBook.Models.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging.Abstractions;
 using Product = BulkyBook.Models.Product;
 
 namespace BulkyBookWeb.Services
@@ -12,11 +13,13 @@ namespace BulkyBookWeb.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public ProductService(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, ILogger<ProductService>? logger = null)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger ?? NullLogger<ProductService>.Instance;
         }
 
         public IEnumerable<Product> GetAllProducts()
@@ -50,6 +53,8 @@ namespace BulkyBookWeb.Services
 
         public void UpsertProduct(ProductVM productVm, List<IFormFile>? files)
         {
+            bool isCreate = productVm.Product.Id == 0;
+
             if (productVm.Product.Id == 0)
             {
                 _unitOfWork.Product.Add(productVm.Product);
@@ -94,6 +99,14 @@ namespace BulkyBookWeb.Services
                 _unitOfWork.Product.Update(productVm.Product);
                 _unitOfWork.Save();
             }
+
+            _logger.LogInformation(
+                "Business event {EventType}: Product upsert completed. ProductId={ProductId}, Title={Title}, CategoryId={CategoryId}, UploadedImages={UploadedImages}",
+                isCreate ? "ProductCreated" : "ProductUpdated",
+                productVm.Product.Id,
+                productVm.Product.Title,
+                productVm.Product.CategoryId,
+                files?.Count ?? 0);
         }
 
         public int? DeleteImage(int imageId)

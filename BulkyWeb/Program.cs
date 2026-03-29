@@ -11,13 +11,37 @@ using Stripe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Globalization;
+using Serilog;
+using Serilog.Formatting.Compact;
 
 internal class Program
 {
-	private static void Main(string[] args)
-	{
+    private static void Main(string[] args)
+    {
         var builder = WebApplication.CreateBuilder(args);
-        
+
+        var elasticLoggingEnabled = builder.Configuration.GetValue<bool>("ElasticLogging:Enabled");
+        var elasticLogFilePath = builder.Configuration["ElasticLogging:FilePath"] ?? "logs/app-log-.ndjson";
+
+        var loggerConfiguration = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Application", "BulkyWeb")
+            .WriteTo.Console(new RenderedCompactJsonFormatter());
+
+        if (elasticLoggingEnabled)
+        {
+            loggerConfiguration.WriteTo.File(
+                formatter: new RenderedCompactJsonFormatter(),
+                path: elasticLogFilePath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 14,
+                shared: true);
+        }
+
+        Log.Logger = loggerConfiguration.CreateLogger();
+        builder.Host.UseSerilog();
+
         // Set default culture to en-US
         var cultureInfo = new CultureInfo("en-US");
         CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
@@ -33,7 +57,7 @@ internal class Program
  
         // Add services to the container.
         builder.Services.AddControllersWithViews();
-		builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
         
         builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
      
@@ -86,16 +110,16 @@ internal class Program
         builder.Services.AddRazorPages();
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-		builder.Services.AddScoped<ICategoryService, CategoryService>();
-		builder.Services.AddScoped<ICompanyService, CompanyService>();
-		builder.Services.AddScoped<IOrderService, OrderService>();
-		builder.Services.AddScoped<IProductService, BulkyBookWeb.Services.ProductService>();
-		builder.Services.AddScoped<IUserService, UserService>();
-		builder.Services.AddScoped<ICartService, CartService>();
-		builder.Services.AddScoped<IHomeService, HomeService>();
-		builder.Services.AddScoped<IEmailSender, EmailSender>();
+        builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<ICompanyService, CompanyService>();
+        builder.Services.AddScoped<IOrderService, OrderService>();
+        builder.Services.AddScoped<IProductService, BulkyBookWeb.Services.ProductService>();
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<ICartService, CartService>();
+        builder.Services.AddScoped<IHomeService, HomeService>();
+        builder.Services.AddScoped<IEmailSender, EmailSender>();
         builder.Services.AddHealthChecks();
-		var app = builder.Build();
+        var app = builder.Build();
 
         var supportedCultures = new[] { "en-US" };
         var localizationOptions = new RequestLocalizationOptions()
@@ -106,28 +130,39 @@ internal class Program
         app.UseRequestLocalization(localizationOptions);
 
         app.MapHealthChecks("/health");
-		// Configure the HTTP request pipeline.
-		if (!app.Environment.IsDevelopment())
-		{
-			app.UseExceptionHandler("/Home/Error");
-			// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-			app.UseHsts();
-		}
+        // Configure the HTTP request pipeline.
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Home/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+        }
 
-		//app.UseHttpsRedirection();
-		app.UseStaticFiles();
+        //app.UseHttpsRedirection();
+        app.UseStaticFiles();
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+            {
+                diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+                diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+                diagnosticContext.Set("RequestPath", httpContext.Request.Path.Value ?? string.Empty);
+            };
+        });
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
         app.UseRouting();
-		app.UseAuthentication();
-		app.UseAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.UseSession();
         SeedDatabase();
-		app.MapRazorPages();
-		app.MapControllerRoute(
-			name: "default",
-			pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+        app.MapRazorPages();
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
-		app.Run();
+        app.Lifetime.ApplicationStopped.Register(Log.CloseAndFlush);
+
+        app.Run();
 
 
         void SeedDatabase()
@@ -146,7 +181,7 @@ internal class Program
                 }
                 catch when (attempt < maxRetries)
                 {
-                    Console.WriteLine($"Database initialization attempt {attempt} failed. Retrying in {delaySeconds} seconds...");
+                    Log.Warning("Database initialization attempt {Attempt} failed. Retrying in {DelaySeconds} seconds...", attempt, delaySeconds);
                     System.Threading.Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
                 }
             }
