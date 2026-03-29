@@ -1,17 +1,25 @@
 services:
   bulkybookweb:
     image: ${DOCKER_REGISTRY-}bulkybookweb
+    user: "0:0"
     build:
       context: .
       dockerfile: BulkyWeb/Dockerfile
     ports:
       - "32768:8080"
     environment:
-        ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_URLS: http://+:8080
+      ElasticLogging__Enabled: "true"
+      ElasticLogging__FilePath: /app/logs/app-log-.ndjson
     env_file:
       - .env
     depends_on:
-      - mssql
+      mssql:
+        condition: service_started
+      logstash:
+        condition: service_started
+    volumes:
+      - bulkylogs:/app/logs
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -20,3 +28,45 @@ services:
       ACCEPT_EULA: Y
     ports:
       - "1433:1433"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./elk/logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - bulkylogs:/var/log/bulky:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: local-local-local-local-local-local-local-local
+    ports:
+      - "5601:5601"
+
+volumes:
+  esdata:
+  bulkylogs:

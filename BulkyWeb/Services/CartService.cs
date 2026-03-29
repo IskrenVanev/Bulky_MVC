@@ -2,6 +2,7 @@ using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utility;
+using Microsoft.Extensions.Logging.Abstractions;
 using Stripe.Checkout;
 
 namespace BulkyBookWeb.Services
@@ -9,10 +10,12 @@ namespace BulkyBookWeb.Services
     public class CartService : ICartService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<CartService> _logger;
 
-        public CartService(IUnitOfWork unitOfWork)
+        public CartService(IUnitOfWork unitOfWork, ILogger<CartService>? logger = null)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger ?? NullLogger<CartService>.Instance;
         }
 
         public ShoppingCartVM GetShoppingCart(string userId)
@@ -104,6 +107,16 @@ namespace BulkyBookWeb.Services
                 _unitOfWork.OrderDetail.Add(orderDetail);
                 _unitOfWork.Save();
             }
+
+            _logger.LogInformation(
+                "Business event {EventType}: Order created. OrderId={OrderId}, UserId={UserId}, ItemCount={ItemCount}, OrderTotal={OrderTotal}, PaymentStatus={PaymentStatus}, OrderStatus={OrderStatus}",
+                "OrderCreated",
+                shoppingCartVM.OrderHeader.Id,
+                userId,
+                shoppingCartVM.ShoppingCartList.Count(),
+                shoppingCartVM.OrderHeader.OrderTotal,
+                shoppingCartVM.OrderHeader.PaymentStatus,
+                shoppingCartVM.OrderHeader.OrderStatus);
 
             return shoppingCartVM.OrderHeader.Id;
         }

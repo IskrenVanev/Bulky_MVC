@@ -40,7 +40,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVm, List<IFormFile> files)
+        public IActionResult Upsert(ProductVM productVm, List<IFormFile>? files)
         {
             ModelState.Remove("Reviews");
             if (ModelState.IsValid )

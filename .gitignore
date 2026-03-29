@@ -365,5 +365,8 @@ FodyWeavers.xsd
 # Environment variables
 .env
 
+# Local-only docs
+readme/
+
 
 
