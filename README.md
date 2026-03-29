@@ -8,6 +8,7 @@
 - Customer area for browsing products, cart, checkout, and order flow
 - Role-based behavior (`Admin`, `Employee`, `Company`, `Customer`)
 - Entity Framework Core + SQL Server
+- ELK Stack (Elasticsearch, Logstash, Kibana) for structured application and business logging
 - Optional external login providers (Facebook, Microsoft)
 - Dockerized app + database setup
 - GitHub Actions CI/CD pipeline with Docker build, health check, and optional ECR push
@@ -19,6 +20,9 @@
 - `Entity Framework Core`
 - `SQL Server 2022` (container in Docker setup)
 - `Stripe`
+- `Elasticsearch 8.13.4` (Log storage and indexing)
+- `Logstash 8.13.4` (Log ingestion and processing)
+- `Kibana 8.13.4` (Data visualization and dashboards)
 - `Docker / Docker Compose`
 - `GitHub Actions`
 - `Amazon Web Services (AWS)` - ECR for container image hosting
@@ -70,6 +74,20 @@ docker compose up --build
 
 - `http://localhost:32768`
 - Health endpoint: `http://localhost:32768/health`
+- Kibana (Logs/Monitoring): `http://localhost:5601`
+
+## Monitoring & Logging (ELK Stack)
+
+The project includes a local ELK Stack integration to collect and visualize:
+- **Application Logs:** System warnings, errors, and diagnostic info.
+- **Request Logs:** HTTP request paths, status codes, and timing via Serilog middleware.
+- **Business Events:** Custom events like `OrderCreated`, `ProductCreated`, and `ProductUpdated`.
+
+### Accessing Logs
+1. Ensure the containers are running (`docker compose up`).
+2. Open **Kibana** at `http://localhost:5601`.
+3. Go to **Stack Management** > **Data Views** and create a view for `bulky-logs-*` with `@timestamp` as the time field (if not already created).
+4. Use the **Discover** tab to search and filter logs.
 
 ## Running Locally (Without Docker)
 
