@@ -3,6 +3,7 @@ using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utility;
 using Microsoft.Extensions.Logging.Abstractions;
+using StackExchange.Redis;
 using Stripe.Checkout;
 
 namespace BulkyBookWeb.Services
@@ -11,11 +12,14 @@ namespace BulkyBookWeb.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CartService> _logger;
+        private readonly IDatabase _cache;
+        private const string CartCountCacheKeyPrefix = "CartCount_";
 
-        public CartService(IUnitOfWork unitOfWork, ILogger<CartService>? logger = null)
+        public CartService(IUnitOfWork unitOfWork, IConnectionMultiplexer redis, ILogger<CartService>? logger = null)
         {
             _unitOfWork = unitOfWork;
             _logger = logger ?? NullLogger<CartService>.Instance;
+            _cache = redis.GetDatabase();
         }
 
         public ShoppingCartVM GetShoppingCart(string userId)
@@ -186,6 +190,7 @@ namespace BulkyBookWeb.Services
             cartFromDb.Count += 1;
             _unitOfWork.ShoppingCart.Update(cartFromDb);
             _unitOfWork.Save();
+            // Cart count doesn't change when increasing quantity of existing item
             return cartFromDb.Count;
         }
 
@@ -194,8 +199,10 @@ namespace BulkyBookWeb.Services
             var cartFromDb = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId, tracked: true);
             if (cartFromDb.Count <= 1)
             {
+                string userId = cartFromDb.ApplicationUserId;
                 _unitOfWork.ShoppingCart.Remove(cartFromDb);
                 _unitOfWork.Save();
+                _cache.KeyDelete(CartCountCacheKeyPrefix + userId);
                 return 0;
             }
             else
@@ -210,13 +217,24 @@ namespace BulkyBookWeb.Services
         public void Remove(int cartId)
         {
             var cartFromDb = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId, tracked: true);
+            string userId = cartFromDb.ApplicationUserId;
             _unitOfWork.ShoppingCart.Remove(cartFromDb);
             _unitOfWork.Save();
+            _cache.KeyDelete(CartCountCacheKeyPrefix + userId);
         }
 
         public int GetCartCount(string userId)
         {
-            return _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId).Count();
+            string cacheKey = CartCountCacheKeyPrefix + userId;
+            var cachedCount = _cache.StringGet(cacheKey);
+            if (cachedCount.HasValue)
+            {
+                return (int)cachedCount;
+            }
+
+            int count = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId).Count();
+            _cache.StringSet(cacheKey, count, TimeSpan.FromMinutes(30));
+            return count;
         }
 
         private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using System.Globalization;
 using Serilog;
 using Serilog.Formatting.Compact;
+using StackExchange.Redis;
 
 internal class Program
 {
@@ -22,6 +23,9 @@ internal class Program
 
         var elasticLoggingEnabled = builder.Configuration.GetValue<bool>("ElasticLogging:Enabled");
         var elasticLogFilePath = builder.Configuration["ElasticLogging:FilePath"] ?? "logs/app-log-.ndjson";
+
+        var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
+        builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
         var loggerConfiguration = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)

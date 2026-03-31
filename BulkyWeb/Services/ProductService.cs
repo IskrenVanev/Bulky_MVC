@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
+using StackExchange.Redis;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Product = BulkyBook.Models.Product;
 
 namespace BulkyBookWeb.Services
@@ -14,17 +17,35 @@ namespace BulkyBookWeb.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<ProductService> _logger;
+        private readonly IDatabase _cache;
+        private const string ProductCacheKey = "AllProducts";
+        private readonly JsonSerializerOptions _jsonOptions;
 
-        public ProductService(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, ILogger<ProductService>? logger = null)
+        public ProductService(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IConnectionMultiplexer redis, ILogger<ProductService>? logger = null)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
             _logger = logger ?? NullLogger<ProductService>.Instance;
+            _cache = redis.GetDatabase();
+            _jsonOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                PropertyNameCaseInsensitive = true
+            };
         }
 
         public IEnumerable<Product> GetAllProducts()
         {
-            return _unitOfWork.Product.GetAll(includeProperties: "Category");
+            var cachedProducts = _cache.StringGet(ProductCacheKey);
+            if (!cachedProducts.IsNull)
+            {
+                return JsonSerializer.Deserialize<IEnumerable<Product>>(cachedProducts!, _jsonOptions) ?? Enumerable.Empty<Product>();
+            }
+
+            var products = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+            _cache.StringSet(ProductCacheKey, JsonSerializer.Serialize(products, _jsonOptions), TimeSpan.FromMinutes(10));
+
+            return products;
         }
 
         public ProductVM GetProductVmForUpsert(int? id)
@@ -41,10 +62,20 @@ namespace BulkyBookWeb.Services
 
             if (id != null && id != 0)
             {
-                Product? existingProduct = _unitOfWork.Product.Get(u => u.Id == id, includeProperties: "ProductImages,Reviews");
-                if (existingProduct != null)
+                string cacheKey = $"Product_{id}";
+                var cachedProduct = _cache.StringGet(cacheKey);
+                if (!cachedProduct.IsNull)
                 {
-                    productVm.Product = existingProduct;
+                    productVm.Product = JsonSerializer.Deserialize<Product>(cachedProduct!, _jsonOptions)!;
+                }
+                else
+                {
+                    Product? existingProduct = _unitOfWork.Product.Get(u => u.Id == id, includeProperties: "ProductImages,Reviews");
+                    if (existingProduct != null)
+                    {
+                        productVm.Product = existingProduct;
+                        _cache.StringSet(cacheKey, JsonSerializer.Serialize(existingProduct, _jsonOptions), TimeSpan.FromMinutes(10));
+                    }
                 }
             }
 
@@ -100,6 +131,8 @@ namespace BulkyBookWeb.Services
                 _unitOfWork.Save();
             }
 
+            InvalidateCache(productVm.Product.Id);
+
             _logger.LogInformation(
                 "Business event {EventType}: Product upsert completed. ProductId={ProductId}, Title={Title}, CategoryId={CategoryId}, UploadedImages={UploadedImages}",
                 isCreate ? "ProductCreated" : "ProductUpdated",
@@ -129,6 +162,7 @@ namespace BulkyBookWeb.Services
 
             _unitOfWork.ProductImage.Remove(imageToBeDeleted);
             _unitOfWork.Save();
+            InvalidateCache(productId);
 
             return productId;
         }
@@ -156,7 +190,17 @@ namespace BulkyBookWeb.Services
 
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();
+            InvalidateCache(id);
             return true;
+        }
+
+        private void InvalidateCache(int? id = null)
+        {
+            _cache.KeyDelete(ProductCacheKey);
+            if (id.HasValue)
+            {
+                _cache.KeyDelete($"Product_{id.Value}");
+            }
         }
     }
 }
